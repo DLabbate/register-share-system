@@ -3,22 +3,21 @@ import sys
 
 #GLOBAL VARIABLES
 #---------------------------------------------------------------------------------------------------
-HOST = ''      # Symbolic name meaning all available interfaces
-PORT = 8888    # Arbitrary non-privileged port
+host = ''      # Symbolic name meaning all available interfaces
+port = 8888    # Arbitrary non-privileged port
 sock = 0
 #---------------------------------------------------------------------------------------------------
 
 
 #FUNCTIONS
 #---------------------------------------------------------------------------------------------------
-
 def createSocket():
     try:
         # printing the IP address of the host
         print(socket.gethostbyname(socket.gethostname()))
         # configure host IP address
-        global HOST
-        HOST = socket.gethostbyname(socket.gethostname())
+        global host
+        host = socket.gethostbyname(socket.gethostname())
          #HOST = "localhost"
          # create the socket
         global sock 
@@ -33,7 +32,7 @@ def createSocket():
 def bindSocket():
     global sock
     try:
-        sock.bind((HOST, PORT))
+        sock.bind((host, port))
     except OSError as msg:
         print('Bind failed. Error Code : ' + str(msg))
         sys.exit()
@@ -60,6 +59,8 @@ def run():
 
 
 #SCRIPT
+#---------------------------------------------------------------------------------------------------
 createSocket()
 bindSocket()
 run()
+#---------------------------------------------------------------------------------------------------
