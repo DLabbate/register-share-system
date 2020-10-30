@@ -29,11 +29,12 @@ class Server():
     def bindSocket(self):
         try:
             self.sock.bind((self.host, self.port))
+            print('Socket bind complete')
         except OSError as msg:
             print('Bind failed. Error Code : ' + str(msg))
             sys.exit()
 
-    print('Socket bind complete')
+            
 
     def run(self):
         while (True):
