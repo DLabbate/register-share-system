@@ -3,7 +3,7 @@ import sys
 import time
 import pickle
 
-class Server():
+class Server:
 
     def __init__(self):
         self.sock = None #socket
