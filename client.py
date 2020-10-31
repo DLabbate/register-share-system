@@ -31,7 +31,7 @@ class Client:
     
     def run(self):
         while(True):
-            msg = pickle.dumps("Hello")
+            msg = pickle.dumps({"TYPE":"INITIALIZATION","MESSAGE":"Hello"})
 
             try:
                 time.sleep(1)
@@ -46,7 +46,7 @@ class Client:
                 sys.exit()
 
     def initialize(self):
-        msg = pickle.dumps("New Client!")
+        msg = pickle.dumps({"TYPE":"INITIALIZATION","MESSAGE":"New Client!"})
 
         try:
             self.s.sendto(msg, (self.hostA, self.portA))

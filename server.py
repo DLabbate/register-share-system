@@ -46,6 +46,12 @@ class Server:
 
             #reply = bytes('OK...' + str(data), "utf-8")
             clientData = pickle.loads(data) #DESERIALIZED DATA
+            clientDict = ''
+            try:
+                clientDict = ast.literal_eval(str(clientData))
+                print(clientDict["TYPE"])
+            except:
+                print("ERROR CONVERTING MESSAGE TO DICTIONARY")
             #clientDict = pickle.loads(data)
             #print(clientDict["TYPE"])
             #print(type(clientData))
