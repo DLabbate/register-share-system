@@ -7,9 +7,18 @@ class Client:
 
     def __init__(self):
         self.s = None
-        self.host = socket.gethostbyname(socket.gethostname())
-        self.port = 8888
-    
+        self.hostA = ''
+        self.portA = 0
+        self.hostB = ''
+        self.portB = 0
+        self.currentServer = ''
+
+    def updateServers(self,hostA,portA,hostB,portB):
+        self.hostA = hostA
+        self.portA = portA
+        self.hostB = hostB
+        self.portB = portB
+        
     def createSocket(self):
         try:
             self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -23,7 +32,7 @@ class Client:
 
             try:
                 time.sleep(1)
-                self.s.sendto(msg, (self.host, self.port))
+                self.s.sendto(msg, (self.hostA, self.portA))
                 d = self.s.recvfrom(1024)
                 reply = d[0]
                 addr = d[1]
