@@ -38,10 +38,6 @@ class Client:
                 d = self.s.recvfrom(1024)
                 reply = d[0]
                 addr = d[1]
-                #clientAddress = self.s.getsockname()
-                #print(str(clientAddress[1]))
-                #print(socket.gethostbyname(socket.gethostname()))
-                #print('Server reply : ' + str(reply.decode("utf-8")))
                 print('Server reply : ' + str(pickle.loads(reply)))
 
             except OSError as msg:
@@ -50,6 +46,7 @@ class Client:
 
     def initialize(self):
         msg = pickle.dumps("New Client!")
+
         try:
             self.s.sendto(msg, (self.hostA, self.portA))
         except OSError as msg:
@@ -58,12 +55,11 @@ class Client:
 
 
     def sendRegister(self,name):
-        # Create message object to send to server through pickle
         self.currentRequestNum += 1
-        #print(str(self.s.getsockname()))
         clientAddress = self.s.getsockname()
         clientIP = socket.gethostbyname(socket.gethostname())
         clientPort = clientAddress[1]
+        # Create message object to send to server through pickle
         msg = {"TYPE":"REGISTER","RQ#":self.currentRequestNum, "NAME":name,"IP":clientIP,"Port":clientPort}
         msg_serialized = pickle.dumps(msg)
         print(msg)

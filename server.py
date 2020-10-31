@@ -2,6 +2,7 @@ import socket
 import sys      
 import time
 import pickle
+import ast
 
 class Server:
 
@@ -34,8 +35,6 @@ class Server:
             print('Bind failed. Error Code : ' + str(msg))
             sys.exit()
 
-            
-
     def run(self):
         while (True):
             d = self.sock.recvfrom(1024)
@@ -46,7 +45,10 @@ class Server:
 
             #reply = bytes('OK...' + str(data), "utf-8")
             clientData = pickle.loads(data) #DESERIALIZED DATA
-            reply = pickle.dumps(data) #SERIALIZED
+            #print(type(clientData))
+            #clientDict = ast.literal_eval(clientData)
+            #print(clientDict["TYPE"])
+            #reply = pickle.dumps(data) #SERIALIZED
 
             self.sock.sendto(data, addr)
             #print('Message[' + str(addr) + ']: ' + str(data.decode("utf-8")))
