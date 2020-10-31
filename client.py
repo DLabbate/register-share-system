@@ -30,7 +30,7 @@ class Client:
     
     def run(self):
         while(True):
-            msg = bytes("Hello!", "utf-8")
+            msg = bytes("Hello", "utf-8")
 
             try:
                 time.sleep(1)
@@ -38,17 +38,32 @@ class Client:
                 d = self.s.recvfrom(1024)
                 reply = d[0]
                 addr = d[1]
+                #clientAddress = self.s.getsockname()
+                #print(str(clientAddress[1]))
+                #print(socket.gethostbyname(socket.gethostname()))
                 print('Server reply : ' + str(reply.decode("utf-8")))
 
             except OSError as msg:
                 print('Error' + str(msg))
                 sys.exit()
 
+    def initialize(self):
+        msg = bytes("New Client!","utf-8")
+        try:
+            self.s.sendto(msg, (self.hostA, self.portA))
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
+
+
     def sendRegister(self,name):
         # Create message object to send to server through pickle
         self.currentRequestNum += 1
         #print(str(self.s.getsockname()))
-        #msg = {"TYPE":"REGISTER","RQ#":str(self.currentRequestNum), "NAME":name,"Socket":str(self.s.getsockname())}
-        #print(msg)
+        clientAddress = self.s.getsockname()
+        clientIP = socket.gethostbyname(socket.gethostname())
+        clientPort = clientAddress[1]
+        msg = {"TYPE":"REGISTER","RQ#":self.currentRequestNum, "NAME":name,"IP":clientIP,"Port":clientPort}
+        print(msg)
 
         
