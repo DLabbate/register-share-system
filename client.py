@@ -30,7 +30,7 @@ class Client:
     
     def run(self):
         while(True):
-            msg = bytes("Hello", "utf-8")
+            msg = pickle.dumps("Hello")
 
             try:
                 time.sleep(1)
@@ -41,14 +41,15 @@ class Client:
                 #clientAddress = self.s.getsockname()
                 #print(str(clientAddress[1]))
                 #print(socket.gethostbyname(socket.gethostname()))
-                print('Server reply : ' + str(reply.decode("utf-8")))
+                #print('Server reply : ' + str(reply.decode("utf-8")))
+                print('Server reply : ' + str(pickle.loads(reply)))
 
             except OSError as msg:
                 print('Error' + str(msg))
                 sys.exit()
 
     def initialize(self):
-        msg = bytes("New Client!","utf-8")
+        msg = pickle.dumps("New Client!")
         try:
             self.s.sendto(msg, (self.hostA, self.portA))
         except OSError as msg:
@@ -64,6 +65,13 @@ class Client:
         clientIP = socket.gethostbyname(socket.gethostname())
         clientPort = clientAddress[1]
         msg = {"TYPE":"REGISTER","RQ#":self.currentRequestNum, "NAME":name,"IP":clientIP,"Port":clientPort}
+        msg_serialized = pickle.dumps(msg)
         print(msg)
+
+        try:
+            self.s.sendto(msg_serialized, (self.hostA, self.portA))
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
 
         

@@ -44,9 +44,12 @@ class Server:
             if not data:
                 break
 
-            reply = bytes('OK...' + str(data), "utf-8")
+            #reply = bytes('OK...' + str(data), "utf-8")
+            clientData = pickle.loads(data) #DESERIALIZED DATA
+            reply = pickle.dumps(data) #SERIALIZED
 
             self.sock.sendto(data, addr)
-            print('Message[' + str(addr) + ']: ' + str(data.decode("utf-8")))
+            #print('Message[' + str(addr) + ']: ' + str(data.decode("utf-8")))
+            print('Message[' + str(addr) + ']: ' + str(clientData))
 
     
