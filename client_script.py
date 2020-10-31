@@ -10,4 +10,6 @@ portB = int(sys.argv[4])
 client = Client()
 client.createSocket()
 client.updateServers(hostA,portA,hostB,portB)
+
+client.sendRegister("dom")
 client.run()
