@@ -3,6 +3,7 @@ import sys
 import time
 import pickle
 import ast
+import json
 
 class Server:
 
@@ -45,6 +46,8 @@ class Server:
 
             #reply = bytes('OK...' + str(data), "utf-8")
             clientData = pickle.loads(data) #DESERIALIZED DATA
+            #clientDict = pickle.loads(data)
+            #print(clientDict["TYPE"])
             #print(type(clientData))
             #clientDict = ast.literal_eval(clientData)
             #print(clientDict["TYPE"])
