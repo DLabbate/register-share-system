@@ -12,5 +12,13 @@ class DBHandler:
         self.userCollection = self.db["users"]
     
     def addUser(self,name,IP,port):
-        user = {"name":name,"IP":IP,"port":port }
-        self.userCollection.insert_one(user)
+        #user = {"name":name,"IP":IP,"port":port }
+
+        try:
+            user = {"_id":name,"IP":IP,"port":port }
+            self.userCollection.insert_one(user)
+            return True 
+        except:
+            print("USERNAME:" + str(name) + " ALREADY EXISTS!")
+            return False
+

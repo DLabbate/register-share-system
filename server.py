@@ -5,6 +5,7 @@ import pickle
 import ast
 import json
 from db_handler import DBHandler
+import utils
 
 class Server:
 
@@ -44,9 +45,18 @@ class Server:
         print('Message[' + str(address) + ']: ' + str(message_dict))
         if (message_type == "INITIALIZATION"):
             pass
+
         elif (message_type == "REGISTER"):
             db = DBHandler()
-            db.addUser(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
+            success = db.addUser(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
+
+            if (success):
+                msg = {"TYPE":"REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            else:
+                msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+
         elif (message_type == "DE-REGISTER"):
             pass
         elif (message_type == "UPDATE-SOCKET"):
@@ -75,7 +85,7 @@ class Server:
 
             try:
                 clientDict = ast.literal_eval(str(clientData))
-                print(clientDict["TYPE"])
+                #print(clientDict["TYPE"])
             except:
                 print("ERROR CONVERTING MESSAGE TO DICTIONARY")
 

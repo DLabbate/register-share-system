@@ -3,6 +3,7 @@ import sys      # for exit
 import time
 import pickle
 import json
+import utils
 
 class Client:
 
@@ -54,13 +55,33 @@ class Client:
             print('Error' + str(msg))
             sys.exit()
     
+    def handle_response(self,msg):
+        msg = (self.s.recvfrom(1024))[0]
+
+        # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
+        try:
+            msg = utils.deserialize(msg)
+            msg_dict = utils.convert_to_dict(msg)
+
+            if (msg_dict["RQ#"] == str(self.currentRequestNum)):
+                print(str(msg_dict))
+
+        except:
+            print("RECEIVED AN INCORRECT RQ#!")
+
+
     def menu(self):
-        print ("[Enter 1 to register\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n[Enter 5 to publish messages]\n[Enter anything else to exit]")
+        print ("[Enter 1 to register]\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n[Enter 5 to publish messages]\n[Enter anything else to exit]")
         command = input()
         if (command == '1'):
             print("Enter name to register:")
             name = input()
             self.sendRegister(name)
+            msg = self.s.recvfrom(1024)
+
+            # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
+            self.handle_response(msg)
+
         elif (command == '2'):
             print("Enter name to de-register:")
             name = input()
