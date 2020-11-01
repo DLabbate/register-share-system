@@ -15,6 +15,7 @@ class Client:
         self.portB = 0
         self.currentServer = ''
         self.currentRequestNum = 0
+        #self.currentRequests = [] # requests that haven't been handled e.g. [0,1]
 
     def updateServers(self,hostA,portA,hostB,portB):
         self.hostA = hostA
