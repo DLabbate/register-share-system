@@ -64,7 +64,7 @@ class Client:
             msg = utils.deserialize(msg)
             msg_dict = utils.convert_to_dict(msg)
 
-            if (msg_dict["RQ#"] == str(self.currentRequestNum)):
+            if (str(msg_dict["RQ#"]) == str(self.currentRequestNum)):
                 print(str(msg_dict))
 
         except:
