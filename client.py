@@ -46,7 +46,7 @@ class Client:
         # Create message object to send to server through pickle
         msg = {"TYPE":"REGISTER","RQ#":self.currentRequestNum,"NAME":name,"IP":clientIP,"Port":clientPort}
         msg_serialized = pickle.dumps(msg)
-        print(msg)
+        #print(msg)
 
         try:
             self.s.sendto(msg_serialized, (self.hostA, self.portA))
@@ -55,7 +55,7 @@ class Client:
             sys.exit()
     
     def menu(self):
-        print ("[Enter 1 to register\nEnter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n[Enter 5 to publish messages]\n[Enter anything else to exit]")
+        print ("[Enter 1 to register\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n[Enter 5 to publish messages]\n[Enter anything else to exit]")
         command = input()
         if (command == '1'):
             print("Enter name to register:")
@@ -76,18 +76,20 @@ class Client:
             
     def run(self):
         while(True):
-            msg = pickle.dumps({"TYPE":"INITIALIZATION","MESSAGE":"Hello"})
+            #msg = pickle.dumps({"TYPE":"INITIALIZATION","MESSAGE":"Hello"})
 
-            try:
-                time.sleep(1)
-                self.s.sendto(msg, (self.hostA, self.portA))
-                d = self.s.recvfrom(1024)
-                reply = d[0]
-                addr = d[1]
-                print('Server reply : ' + str(pickle.loads(reply)))
+            # try:
+            #     time.sleep(1)
+            #     self.s.sendto(msg, (self.hostA, self.portA))
+            #     d = self.s.recvfrom(1024)
+            #     reply = d[0]
+            #     addr = d[1]
+            #     print('Server reply : ' + str(pickle.loads(reply)))
 
-            except OSError as msg:
-                print('Error' + str(msg))
-                sys.exit()
+            # except OSError as msg:
+            #     print('Error' + str(msg))
+            #     sys.exit()
+
+            self.menu()
 
             

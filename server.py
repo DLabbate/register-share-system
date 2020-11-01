@@ -4,6 +4,7 @@ import time
 import pickle
 import ast
 import json
+from db_handler import DBHandler
 
 class Server:
 
@@ -36,6 +37,27 @@ class Server:
             print('Bind failed. Error Code : ' + str(msg))
             sys.exit()
 
+    # Process message and call appropriate function
+    def handleClient(self,message_dict,address):
+        message_type = message_dict["TYPE"]
+
+        print('Message[' + str(address) + ']: ' + str(message_dict))
+        if (message_type == "INITIALIZATION"):
+            pass
+        elif (message_type == "REGISTRATION"):
+            db = DBHandler()
+            db.addUser(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
+        elif (message_type == "DE-REGISTRATION"):
+            pass
+        elif (message_type == "UPDATE-SOCKET"):
+            pass
+        elif (message_type == "SUBJECTS"):
+            pass
+        elif (message_type == "PUBLISH"):
+            pass
+        else:
+            pass
+
     def run(self):
         while (True):
             d = self.sock.recvfrom(1024)
@@ -44,10 +66,13 @@ class Server:
             if not data:
                 break
 
+
             #reply = bytes('OK...' + str(data), "utf-8")
             clientData = pickle.loads(data) #DESERIALIZED DATA
             clientDict = ''
             
+            #handleclient(clientData,address)
+
             try:
                 clientDict = ast.literal_eval(str(clientData))
                 print(clientDict["TYPE"])
