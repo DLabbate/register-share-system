@@ -29,22 +29,6 @@ class Client:
             print('Failed to create socket')
             sys.exit()
     
-    def run(self):
-        while(True):
-            msg = pickle.dumps({"TYPE":"INITIALIZATION","MESSAGE":"Hello"})
-
-            try:
-                time.sleep(1)
-                self.s.sendto(msg, (self.hostA, self.portA))
-                d = self.s.recvfrom(1024)
-                reply = d[0]
-                addr = d[1]
-                print('Server reply : ' + str(pickle.loads(reply)))
-
-            except OSError as msg:
-                print('Error' + str(msg))
-                sys.exit()
-
     def initialize(self):
         msg = pickle.dumps({"TYPE":"INITIALIZATION","MESSAGE":"New Client!"})
 
@@ -53,7 +37,6 @@ class Client:
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
-
 
     def sendRegister(self,name):
         self.currentRequestNum += 1
@@ -70,5 +53,41 @@ class Client:
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
+    
+    def menu(self):
+        print ("[Enter 1 to register\nEnter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n[Enter 5 to publish messages]\n[Enter anything else to exit]")
+        command = input()
+        if (command == '1'):
+            print("Enter name to register:")
+            name = input()
+            self.sendRegister(name)
+        elif (command == '2'):
+            print("Enter name to de-register:")
+            name = input()
+        elif (command == '3'):
+            # TO DO
+            print('Option 3')
+        elif (command == '4'):
+            print("Enter new list of subjects (e.g. sports,AI,...)")
+        elif (command == '5'):
+            print("Enter your message")
+        else:
+            sys.exit()
+            
+    def run(self):
+        while(True):
+            msg = pickle.dumps({"TYPE":"INITIALIZATION","MESSAGE":"Hello"})
 
-        
+            try:
+                time.sleep(1)
+                self.s.sendto(msg, (self.hostA, self.portA))
+                d = self.s.recvfrom(1024)
+                reply = d[0]
+                addr = d[1]
+                print('Server reply : ' + str(pickle.loads(reply)))
+
+            except OSError as msg:
+                print('Error' + str(msg))
+                sys.exit()
+
+            
