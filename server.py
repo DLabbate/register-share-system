@@ -44,10 +44,10 @@ class Server:
         print('Message[' + str(address) + ']: ' + str(message_dict))
         if (message_type == "INITIALIZATION"):
             pass
-        elif (message_type == "REGISTRATION"):
+        elif (message_type == "REGISTER"):
             db = DBHandler()
             db.addUser(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
-        elif (message_type == "DE-REGISTRATION"):
+        elif (message_type == "DE-REGISTER"):
             pass
         elif (message_type == "UPDATE-SOCKET"):
             pass
@@ -78,6 +78,9 @@ class Server:
                 print(clientDict["TYPE"])
             except:
                 print("ERROR CONVERTING MESSAGE TO DICTIONARY")
+
+            self.handleClient(clientDict,addr)
+
             #clientDict = pickle.loads(data)
             #print(clientDict["TYPE"])
             #print(type(clientData))
@@ -86,7 +89,7 @@ class Server:
             #reply = pickle.dumps(data) #SERIALIZED
 
             self.sock.sendto(data, addr)
-            #print('Message[' + str(addr) + ']: ' + str(data.decode("utf-8")))
-            print('Message[' + str(addr) + ']: ' + str(clientData))
+            
+            #print('Message[' + str(addr) + ']: ' + str(clientData))
 
     

@@ -44,7 +44,7 @@ class Client:
         clientIP = socket.gethostbyname(socket.gethostname())
         clientPort = clientAddress[1]
         # Create message object to send to server through pickle
-        msg = {"TYPE":"REGISTER","RQ#":self.currentRequestNum,"NAME":name,"IP":clientIP,"Port":clientPort}
+        msg = {"TYPE":"REGISTER","RQ#":self.currentRequestNum,"NAME":name,"IP":clientIP,"PORT":clientPort}
         msg_serialized = pickle.dumps(msg)
         #print(msg)
 
