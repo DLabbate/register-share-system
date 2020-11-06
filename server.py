@@ -14,7 +14,7 @@ class Server:
         self.host = None
         self.port = 8888
 
-    def createSocket(self):
+    def create_socket(self):
         try:
             # printing the IP address of the host
             print(socket.gethostbyname(socket.gethostname()))
@@ -30,7 +30,7 @@ class Server:
             print('Failed to create socket. Error Code : ' + str(msg))
             sys.exit()
 
-    def bindSocket(self):
+    def bind_socket(self):
         try:
             self.sock.bind((self.host, self.port))
             print('Socket bind complete')
@@ -39,7 +39,7 @@ class Server:
             sys.exit()
 
     # Process message and call appropriate function
-    def handleClient(self,message_dict,address):
+    def handle_client(self,message_dict,address):
         message_type = message_dict["TYPE"]
 
         print('Message[' + str(address) + ']: ' + str(message_dict))
@@ -48,7 +48,7 @@ class Server:
 
         elif (message_type == "REGISTER"):
             db = DBHandler()
-            success = db.addUser(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
+            success = db.add_user(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
 
             if (success):
                 msg = {"TYPE":"REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
@@ -78,18 +78,18 @@ class Server:
 
 
             #reply = bytes('OK...' + str(data), "utf-8")
-            clientData = pickle.loads(data) #DESERIALIZED DATA
-            clientDict = ''
+            client_data = pickle.loads(data) #DESERIALIZED DATA
+            client_dict = ''
             
             #handleclient(clientData,address)
 
             try:
-                clientDict = ast.literal_eval(str(clientData))
+                client_dict = ast.literal_eval(str(client_data))
                 #print(clientDict["TYPE"])
             except:
                 print("ERROR CONVERTING MESSAGE TO DICTIONARY")
 
-            self.handleClient(clientDict,addr)
+            self.handle_client(client_dict,addr)
 
             #clientDict = pickle.loads(data)
             #print(clientDict["TYPE"])

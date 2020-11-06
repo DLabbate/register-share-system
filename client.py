@@ -8,25 +8,25 @@ import utils
 class Client:
 
     def __init__(self):
-        self.s = None   #client socket
-        self.hostA = ''
-        self.portA = 0
-        self.hostB = ''
-        self.portB = 0
-        self.currentServer = ''
-        self.currentRequestNum = 0
+        self.client_socket = None   #client socket
+        self.host_a = ''
+        self.port_a = 0
+        self.host_b = ''
+        self.port_b = 0
+        self.current_server = ''
+        self.current_request_num = 0
         #self.currentRequests = [] # requests that haven't been handled e.g. [0,1]
 
-    def updateServers(self,hostA,portA,hostB,portB):
-        self.hostA = hostA
-        self.portA = portA
-        self.hostB = hostB
-        self.portB = portB
+    def update_servers(self,host_a,port_a,host_b,port_b):
+        self.host_a = host_a
+        self.port_a = port_a
+        self.host_b = host_b
+        self.port_b = port_b
 
     #This function creates a socket for the CLIENT    
-    def createSocket(self):
+    def create_socket(self):
         try:
-            self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         except OSError as msg:
             print('Failed to create socket')
             sys.exit()
@@ -35,36 +35,36 @@ class Client:
         msg = pickle.dumps({"TYPE":"INITIALIZATION","MESSAGE":"New Client!"})
 
         try:
-            self.s.sendto(msg, (self.hostA, self.portA))
+            self.client_socket.sendto(msg, (self.host_a, self.port_a))
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
 
-    def sendRegister(self,name):
-        self.currentRequestNum += 1
-        clientAddress = self.s.getsockname()
-        clientIP = socket.gethostbyname(socket.gethostname())
-        clientPort = clientAddress[1]
+    def send_register(self,name):
+        self.current_request_num += 1
+        cient_address = self.client_socket.getsockname()
+        client_ip = socket.gethostbyname(socket.gethostname())
+        client_port = cient_address[1]
         # Create message object to send to server through pickle
-        msg = {"TYPE":"REGISTER","RQ#":self.currentRequestNum,"NAME":name,"IP":clientIP,"PORT":clientPort}
+        msg = {"TYPE":"REGISTER","RQ#":self.current_request_num,"NAME":name,"IP":client_ip,"PORT":client_port}
         msg_serialized = pickle.dumps(msg)
         #print(msg)
 
         try:
-            self.s.sendto(msg_serialized, (self.hostA, self.portA))
+            self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
     
     def handle_response(self,msg):
-        msg = (self.s.recvfrom(1024))[0]
+        msg = (self.client_socket.recvfrom(1024))[0]
 
         # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
         try:
             msg = utils.deserialize(msg)
             msg_dict = utils.convert_to_dict(msg)
 
-            if (str(msg_dict["RQ#"]) == str(self.currentRequestNum)):
+            if (str(msg_dict["RQ#"]) == str(self.current_request_num)):
                 print(str(msg_dict))
 
         except:
@@ -77,8 +77,8 @@ class Client:
         if (command == '1'):
             print("Enter name to register:")
             name = input()
-            self.sendRegister(name)
-            msg = self.s.recvfrom(1024)
+            self.send_register(name)
+            msg = self.client_socket.recvfrom(1024)
 
             # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
             self.handle_response(msg)
