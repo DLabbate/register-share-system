@@ -18,7 +18,7 @@ class Client:
         self.current_server = ''
         self.current_request_num = 0
         self.log_file_path = '' # make a new log file for the client
-        #self.semaphore = threading.Semaphore(1)
+        self.semaphore = threading.Semaphore(1)
         #self.log_file = 0
         #self.currentRequests = [] # requests that haven't been handled e.g. [0,1]
         
@@ -44,11 +44,11 @@ class Client:
             sys.exit()
 
     def write_to_log(self,msg):
-        #self.semaphore.acquire()
+        self.semaphore.acquire()
         log_file = open(self.log_file_path,"a+")
         log_file.write(str(msg))
         log_file.close()
-        #self.semaphore.release()
+        self.semaphore.release()
     
     def initialize(self):
         msg = {"TYPE":"INITIALIZATION","MESSAGE":"New Client!"}
@@ -68,7 +68,7 @@ class Client:
         client_port = cient_address[1]
         # Create message object to send to server through pickle
         msg = {"TYPE":"REGISTER","RQ#":self.current_request_num,"NAME":name,"IP":client_ip,"PORT":client_port}
-        self.write_to_log("MESSAGE SENT" + str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         #print(msg)
 
