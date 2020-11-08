@@ -4,6 +4,8 @@ import time
 import pickle
 import json
 import utils
+import threading
+import datetime
 
 class Client:
 
@@ -15,6 +17,8 @@ class Client:
         self.port_b = 0
         self.current_server = ''
         self.current_request_num = 0
+        self.log_file_path = "logs/" + "client" + ".txt" # make a new log file for the client
+        self.log_file = 0
         #self.currentRequests = [] # requests that haven't been handled e.g. [0,1]
 
     def update_servers(self,host_a,port_a,host_b,port_b):
@@ -40,6 +44,11 @@ class Client:
             print('Error' + str(msg))
             sys.exit()
 
+    def write_to_log(self,msg):
+        log_file = open(self.log_file_path,"a+")
+        log_file.write(str(msg))
+        log_file.close()
+
     def send_register(self,name):
         self.current_request_num += 1
         cient_address = self.client_socket.getsockname()
@@ -47,6 +56,7 @@ class Client:
         client_port = cient_address[1]
         # Create message object to send to server through pickle
         msg = {"TYPE":"REGISTER","RQ#":self.current_request_num,"NAME":name,"IP":client_ip,"PORT":client_port}
+        self.write_to_log(str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         #print(msg)
 
@@ -70,34 +80,43 @@ class Client:
         except:
             print("RECEIVED AN INCORRECT RQ#!")
 
+    
 
     def menu(self):
-        print ("[Enter 1 to register]\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n[Enter 5 to publish messages]\n[Enter anything else to exit]")
-        command = input()
-        if (command == '1'):
-            print("Enter name to register:")
-            name = input()
-            self.send_register(name)
-            msg = self.client_socket.recvfrom(1024)
-
-            # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
-            self.handle_response(msg)
-
-        elif (command == '2'):
-            print("Enter name to de-register:")
-            name = input()
-        elif (command == '3'):
-            # TO DO
-            print('Option 3')
-        elif (command == '4'):
-            print("Enter new list of subjects (e.g. sports,AI,...)")
-        elif (command == '5'):
-            print("Enter your message")
-        else:
-            sys.exit()
-            
-    def run(self):
         while(True):
+            print ("[Enter 1 to register]\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n[Enter 5 to publish messages]\n[Enter anything else to exit]")
+            command = input()
+            if (command == '1'):
+                print("Enter name to register:")
+                name = input()
+                self.send_register(name)
+            elif (command == '2'):
+                print("Enter name to de-register:")
+                name = input()
+            elif (command == '3'):
+                # TO DO
+                print('Option 3')
+            elif (command == '4'):
+                print("Enter new list of subjects (e.g. sports,AI,...)")
+            elif (command == '5'):
+                print("Enter your message")
+            else:
+                sys.exit()
+
+    def listen(self):
+        msg = self.client_socket.recvfrom(1024)
+        # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
+        self.handle_response(msg)
+        date = datetime.datetime.now()
+        print("client " + str(date))
+        
+    def run(self):
+        menu_thread = threading.Thread(target = self.menu)
+        menu_thread.start()
+
+        listening_thread = threading.Thread(target = self.listen)
+        listening_thread.start()
+
             #msg = pickle.dumps({"TYPE":"INITIALIZATION","MESSAGE":"Hello"})
 
             # try:
@@ -111,7 +130,5 @@ class Client:
             # except OSError as msg:
             #     print('Error' + str(msg))
             #     sys.exit()
-
-            self.menu()
-
-            
+        
+        #print(str(threading.active_count()))
