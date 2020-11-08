@@ -18,6 +18,7 @@ class Client:
         self.current_server = ''
         self.current_request_num = 0
         self.log_file_path = '' # make a new log file for the client
+        #self.semaphore = threading.Semaphore(1)
         #self.log_file = 0
         #self.currentRequests = [] # requests that haven't been handled e.g. [0,1]
         
@@ -41,20 +42,24 @@ class Client:
         except OSError as msg:
             print('Failed to create socket')
             sys.exit()
-    
-    def initialize(self):
-        msg = pickle.dumps({"TYPE":"INITIALIZATION","MESSAGE":"New Client!"})
-
-        try:
-            self.client_socket.sendto(msg, (self.host_a, self.port_a))
-        except OSError as msg:
-            print('Error' + str(msg))
-            sys.exit()
 
     def write_to_log(self,msg):
+        #self.semaphore.acquire()
         log_file = open(self.log_file_path,"a+")
         log_file.write(str(msg))
         log_file.close()
+        #self.semaphore.release()
+    
+    def initialize(self):
+        msg = {"TYPE":"INITIALIZATION","MESSAGE":"New Client!"}
+        msg_serialized = utils.serialize(msg)
+
+        try:
+            self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
 
     def send_register(self,name):
         self.current_request_num += 1
@@ -63,7 +68,7 @@ class Client:
         client_port = cient_address[1]
         # Create message object to send to server through pickle
         msg = {"TYPE":"REGISTER","RQ#":self.current_request_num,"NAME":name,"IP":client_ip,"PORT":client_port}
-        self.write_to_log(str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT" + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         #print(msg)
 
@@ -82,7 +87,8 @@ class Client:
             msg_dict = utils.convert_to_dict(msg)
 
             if (str(msg_dict["RQ#"]) == str(self.current_request_num)):
-                print(str(msg_dict))
+                self.write_to_log("MESSAGE RECEIVED " + str(msg_dict) + "\n")
+                #print(str(msg_dict))
 
         except:
             print("RECEIVED AN INCORRECT RQ#!")
@@ -111,11 +117,13 @@ class Client:
                 sys.exit()
 
     def listen(self):
-        msg = self.client_socket.recvfrom(1024)
-        # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
-        self.handle_response(msg)
-        date = datetime.datetime.now()
-        print("client " + str(date))
+        while True:
+            msg = self.client_socket.recvfrom(1024)
+            # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
+            self.handle_response(msg)
+            #date = datetime.datetime.now()
+            #print("client " + str(date))
+
         
     def run(self):
         menu_thread = threading.Thread(target = self.menu)
