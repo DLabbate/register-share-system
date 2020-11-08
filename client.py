@@ -16,7 +16,7 @@ class Client:
         self.host_b = ''
         self.port_b = 0
         self.current_server = ''
-        self.current_request_num = 0
+        self.current_request_num = 1
         self.log_file_path = '' # make a new log file for the client
         self.semaphore = threading.Semaphore(1)
         #self.log_file = 0
@@ -62,7 +62,6 @@ class Client:
             sys.exit()
 
     def send_register(self,name):
-        self.current_request_num += 1
         cient_address = self.client_socket.getsockname()
         client_ip = socket.gethostbyname(socket.gethostname())
         client_port = cient_address[1]
@@ -74,6 +73,7 @@ class Client:
 
         try:
             self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            self.current_request_num += 1
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
@@ -85,15 +85,16 @@ class Client:
         try:
             msg = utils.deserialize(msg)
             msg_dict = utils.convert_to_dict(msg)
+        except:
+            self.write_to_log("FAILED TO DESERIALIZE RECEIVED MESSAGE!")
 
+        try:
             if (str(msg_dict["RQ#"]) == str(self.current_request_num)):
                 self.write_to_log("MESSAGE RECEIVED " + str(msg_dict) + "\n")
                 #print(str(msg_dict))
-
         except:
-            print("RECEIVED AN INCORRECT RQ#!")
+            self.write_to_log("RECEIVED AN INVALID RQ#")
 
-    
 
     def menu(self):
         while(True):
