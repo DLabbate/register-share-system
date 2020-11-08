@@ -20,7 +20,7 @@ class Client:
         self.log_file_path = '' # make a new log file for the client
         self.semaphore = threading.Semaphore(1)
         #self.log_file = 0
-        #self.currentRequests = [] # requests that haven't been handled e.g. [0,1]
+        self.current_requests = [] # requests that have been sent but have not yet been handled e.g. [0,1]
         
     def initialize_log_file(self):
         date_str_temp = str(datetime.datetime.now())
@@ -73,11 +73,16 @@ class Client:
 
         try:
             self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
-            self.current_request_num += 1
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
     
+    def check_valid_request(self,rq):
+        is_valid = False
+        if rq in self.current_requests:
+            is_valid = True
+        return is_valid
+
     def handle_response(self,msg):
         msg = (self.client_socket.recvfrom(1024))[0]
 
@@ -89,17 +94,21 @@ class Client:
             self.write_to_log("FAILED TO DESERIALIZE RECEIVED MESSAGE!")
 
         try:
-            if (str(msg_dict["RQ#"]) == str(self.current_request_num)):
+            #if (str(msg_dict["RQ#"]) == str(self.current_request_num)):
+            #self.write_to_log(type(int(msg_dict["RQ#"])))
+            if ( self.check_valid_request(int(msg_dict["RQ#"])) ):
                 self.write_to_log("MESSAGE RECEIVED " + str(msg_dict) + "\n")
+                self.current_requests.remove((int(msg_dict["RQ#"])))
+                #print(self.current_requests)
                 #print(str(msg_dict))
         except:
             self.write_to_log("RECEIVED AN INVALID RQ#")
-
 
     def menu(self):
         while(True):
             print ("[Enter 1 to register]\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n[Enter 5 to publish messages]\n[Enter anything else to exit]")
             command = input()
+            self.current_requests.append(self.current_request_num)
             if (command == '1'):
                 print("Enter name to register:")
                 name = input()
@@ -116,6 +125,7 @@ class Client:
                 print("Enter your message")
             else:
                 sys.exit()
+            self.current_request_num += 1
 
     def listen(self):
         while True:
