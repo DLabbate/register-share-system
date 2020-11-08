@@ -17,9 +17,16 @@ class Client:
         self.port_b = 0
         self.current_server = ''
         self.current_request_num = 0
-        self.log_file_path = "logs/" + "client" + ".txt" # make a new log file for the client
-        self.log_file = 0
+        self.log_file_path = '' # make a new log file for the client
+        #self.log_file = 0
         #self.currentRequests = [] # requests that haven't been handled e.g. [0,1]
+        
+    def initialize_log_file(self):
+        date_str_temp = str(datetime.datetime.now())
+        date_str = date_str_temp.replace(" ","-") #This replaces spaces in the file path with a '-'
+        date_str = date_str.replace(".","-") #This replaces spaces in the file path with a '-'
+        date_str = date_str.replace(":","-") #This replaces spaces in the file path with a '-'
+        self.log_file_path = "logs/" + "client-" + date_str + ".txt"
 
     def update_servers(self,host_a,port_a,host_b,port_b):
         self.host_a = host_a
