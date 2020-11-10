@@ -76,7 +76,37 @@ class Client:
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
-    
+
+    def send_deregister(self,name):
+
+        # Create message object to send to server through pickle
+        msg = {"TYPE":"DE-REGISTER","RQ#":self.current_request_num,"NAME":name}
+        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        msg_serialized = pickle.dumps(msg)
+        #print(msg)
+
+        try:
+            self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
+
+    def send_update(self,name):
+        cient_address = self.client_socket.getsockname()
+        client_ip = socket.gethostbyname(socket.gethostname())
+        client_port = cient_address[1]
+        # Create message object to send to server through pickle
+        msg = {"TYPE":"UPDATE-SOCKET","RQ#":self.current_request_num,"NAME":name,"IP":client_ip,"PORT":client_port}
+        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        msg_serialized = pickle.dumps(msg)
+        #print(msg)
+
+        try:
+            self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
+
     def check_valid_request(self,rq):
         is_valid = False
         if rq in self.current_requests:
@@ -111,25 +141,60 @@ class Client:
         except:
             self.write_to_log("ERROR READING MESSAGE!")
 
+    def send_update_subjects(self, name, subjects):
+        # Create message object to send to server through pickle
+        msg = {"TYPE": "SUBJECTS", "RQ#": self.current_request_num, "NAME": name, "SUBJECT-LIST": subjects}
+        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        msg_serialized = pickle.dumps(msg)
+        # print(msg)
+
+        try:
+            self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
+
+    def send_publish (self, name, subject, text):
+        # Create message object to send to server through pickle
+        msg = {"TYPE": "PUBLISH", "RQ#": self.current_request_num, "NAME": name, "SUBJECT": subject, "TEXT":text}
+        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        msg_serialized = pickle.dumps(msg)
+        # print(msg)
+
+        try:
+            self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
+
+
     def menu(self):
+
         while(True):
             print ("[Enter 1 to register]\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n[Enter 5 to publish messages]\n[Enter anything else to exit]")
             command = input()
             self.current_requests.append(self.current_request_num)
             if (command == '1'):
-                print("Enter name to register:")
-                name = input()
+                name = input("Enter name to register: ")
                 self.send_register(name)
             elif (command == '2'):
-                print("Enter name to de-register:")
-                name = input()
+                name = input("Enter name to de-register: ")
+                self.send_deregister(name)
             elif (command == '3'):
                 # TO DO
-                print('Option 3')
+                name = input ("Enter name to update socket#: ")
+                self.send_update(name)
             elif (command == '4'):
-                print("Enter new list of subjects (e.g. sports,AI,...)")
+                name = input ("Enter name to update subjects: ")
+                subjects = input ("Enter new list of subjects (e.g. sports,AI,...): ")
+                self.send_update_subjects(name,subjects)
+                #subjects = subjects.split(",")
             elif (command == '5'):
-                print("Enter your message")
+                name = input("Enter name to publish a message: ")
+                subject = input ("Enter subject of the message: ")
+                text = input ("Enter message: ")
+                self.send_publish(name,subject,text)
+
             else:
                 sys.exit()
             self.current_request_num += 1
