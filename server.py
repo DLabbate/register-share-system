@@ -98,7 +98,7 @@ class Server:
             #print(clientDict["TYPE"])
             #reply = pickle.dumps(data) #SERIALIZED
 
-            self.sock.sendto(data, addr)
+            #self.sock.sendto(data, addr)
             
             #print('Message[' + str(addr) + ']: ' + str(clientData))
 

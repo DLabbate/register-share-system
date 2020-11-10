@@ -84,7 +84,7 @@ class Client:
         return is_valid
 
     def handle_response(self,msg):
-        msg = (self.client_socket.recvfrom(1024))[0]
+        msg = (msg)[0]
 
         # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
         try:
