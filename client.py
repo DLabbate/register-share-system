@@ -96,13 +96,20 @@ class Client:
         try:
             #if (str(msg_dict["RQ#"]) == str(self.current_request_num)):
             #self.write_to_log(type(int(msg_dict["RQ#"])))
-            if ( self.check_valid_request(int(msg_dict["RQ#"])) ):
-                self.write_to_log("MESSAGE RECEIVED " + str(msg_dict) + "\n")
-                self.current_requests.remove((int(msg_dict["RQ#"])))
-                #print(self.current_requests)
-                #print(str(msg_dict))
+            if "RQ#" in msg_dict:
+                if ( self.check_valid_request(int(msg_dict["RQ#"])) ):
+                    self.write_to_log("MESSAGE RECEIVED " + str(msg_dict) + "\n")
+                    self.current_requests.remove((int(msg_dict["RQ#"])))
+                    #print(self.current_requests)
+                    #print(str(msg_dict))
+                else:
+                    self.write_to_log("RECEIVED AN INVALID RQ#!")
+            else:
+                pass
+                #In this branch, the message does not have a key for RQ#
+                #This might be a message coming from the server to inform the client that the server location has changed
         except:
-            self.write_to_log("RECEIVED AN INVALID RQ#")
+            self.write_to_log("ERROR READING MESSAGE!")
 
     def menu(self):
         while(True):
