@@ -2,14 +2,14 @@ import sys
 import socket
 from client import Client
 
-hostA = str(sys.argv[1])
-portA = int(sys.argv[2])
-hostB = str(sys.argv[3])
-portB = int(sys.argv[4])
+host_a = str(sys.argv[1])
+port_a = int(sys.argv[2])
+host_b = str(sys.argv[3])
+port_b = int(sys.argv[4])
 
 client = Client()
-client.createSocket()
-client.updateServers(hostA,portA,hostB,portB)
+client.create_socket()
+client.update_servers(host_a,port_a,host_b,port_b)
+client.initialize_log_file()
 client.initialize()
-client.sendRegister("dom")
 client.run()

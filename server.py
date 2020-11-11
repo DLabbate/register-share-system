@@ -4,6 +4,8 @@ import time
 import pickle
 import ast
 import json
+from db_handler import DBHandler
+import utils
 
 class Server:
 
@@ -12,7 +14,7 @@ class Server:
         self.host = None
         self.port = 8888
 
-    def createSocket(self):
+    def create_socket(self):
         try:
             # printing the IP address of the host
             print(socket.gethostbyname(socket.gethostname()))
@@ -28,13 +30,43 @@ class Server:
             print('Failed to create socket. Error Code : ' + str(msg))
             sys.exit()
 
-    def bindSocket(self):
+    def bind_socket(self):
         try:
             self.sock.bind((self.host, self.port))
             print('Socket bind complete')
         except OSError as msg:
             print('Bind failed. Error Code : ' + str(msg))
             sys.exit()
+
+    # Process message and call appropriate function
+    def handle_client(self,message_dict,address):
+        message_type = message_dict["TYPE"]
+
+        print('Message[' + str(address) + ']: ' + str(message_dict))
+        if (message_type == "INITIALIZATION"):
+            pass
+
+        elif (message_type == "REGISTER"):
+            db = DBHandler()
+            success = db.add_user(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
+
+            if (success):
+                msg = {"TYPE":"REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            else:
+                msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+
+        elif (message_type == "DE-REGISTER"):
+            pass
+        elif (message_type == "UPDATE-SOCKET"):
+            pass
+        elif (message_type == "SUBJECTS"):
+            pass
+        elif (message_type == "PUBLISH"):
+            pass
+        else:
+            pass
 
     def run(self):
         while (True):
@@ -44,15 +76,21 @@ class Server:
             if not data:
                 break
 
+
             #reply = bytes('OK...' + str(data), "utf-8")
-            clientData = pickle.loads(data) #DESERIALIZED DATA
-            clientDict = ''
+            client_data = pickle.loads(data) #DESERIALIZED DATA
+            client_dict = ''
             
+            #handleclient(clientData,address)
+
             try:
-                clientDict = ast.literal_eval(str(clientData))
-                print(clientDict["TYPE"])
+                client_dict = ast.literal_eval(str(client_data))
+                #print(clientDict["TYPE"])
             except:
                 print("ERROR CONVERTING MESSAGE TO DICTIONARY")
+
+            self.handle_client(client_dict,addr)
+
             #clientDict = pickle.loads(data)
             #print(clientDict["TYPE"])
             #print(type(clientData))
@@ -60,8 +98,8 @@ class Server:
             #print(clientDict["TYPE"])
             #reply = pickle.dumps(data) #SERIALIZED
 
-            self.sock.sendto(data, addr)
-            #print('Message[' + str(addr) + ']: ' + str(data.decode("utf-8")))
-            print('Message[' + str(addr) + ']: ' + str(clientData))
+            #self.sock.sendto(data, addr)
+            
+            #print('Message[' + str(addr) + ']: ' + str(clientData))
 
     
