@@ -16,12 +16,24 @@ class Server:
         self.host = None
         self.port = 8888
         self.log_file_path = ''
+        self.active = False
+        self.host_backup = None
+        self.port_backup = 0
+
+
+    def server_initialize(self, status,port, host_backup, port_backup):
+        if (status == 'active'):
+            self.active = True
+        self.port = port
+        self.host_backup = host_backup
+        self.port_backup = port_backup
+
 
     def initialize_log_file(self):
         date_str_temp = str(datetime.datetime.now())
-        date_str = date_str_temp.replace(" ","-") #This replaces spaces in the file path with a '-'
-        date_str = date_str.replace(".","-") #This replaces spaces in the file path with a '-'
-        date_str = date_str.replace(":","-") #This replaces spaces in the file path with a '-'
+        date_str = date_str_temp.replace(" ", "-")  #This replaces spaces in the file path with a '-'
+        date_str = date_str.replace(".", "-") #This replaces spaces in the file path with a '-'
+        date_str = date_str.replace(":", "-") #This replaces spaces in the file path with a '-'
         self.log_file_path = "logs/server/" + "server-" + date_str + ".txt"
 
     def write_to_log(self,msg):
@@ -42,8 +54,8 @@ class Server:
             # create the socket
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.write_to_log(socket.gethostbyname(socket.gethostname()))
-            self.write_to_log('Server socket created')
-            print('Socket created')
+            self.write_to_log(self.port)
+            self.write_to_log('Server socket created ')
 
         except OSError as msg:
             print('Failed to create socket. Error Code : ' + str(msg))
