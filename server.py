@@ -77,11 +77,25 @@ class Server:
                 msg = {"TYPE":"UPDATE-SOCKET-SUCCESS","RQ#":message_dict["RQ#"]}
                 self.sock.sendto(utils.serialize(msg), address)
             else:
-                msg = {"TYPE":"DE-REGISTER-DENIED","RQ#":message_dict["RQ#"]}
+                msg = {"TYPE":"UPDATE-SOCKET-DENIED","RQ#":message_dict["RQ#"]}
                 self.sock.sendto(utils.serialize(msg), address)
             
         elif (message_type == "SUBJECTS"):
-            pass
+            db = DBHandler()
+            subjects_list = message_dict["SUBJECT-LIST"].split(",")
+            #print ("subject_list: " + (subjects_list))
+            print (subjects_list)
+
+            success = db.update_subjects(message_dict["NAME"], subjects_list)
+
+            if (success):
+                msg = {"TYPE":"UPDATE-SUBJECTS-SUCCESS","RQ#":message_dict["RQ#"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            else:
+                msg = {"TYPE":"UPDATE-SUBJECTS-DENIED","RQ#":message_dict["RQ#"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
+                self.sock.sendto(utils.serialize(msg), address)
+
+
         elif (message_type == "PUBLISH"):
             pass
         else:

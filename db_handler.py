@@ -50,5 +50,23 @@ class DBHandler:
             print("USERNAME:" + str(name) + "DOES NOT EXIST!")
             return False 
 
+    #Takes input array of subjects
+    def update_subjects(self,name,subjects):
+
+        try: 
+
+            user_query = {"_id":name}
+            user_newvalues = {"$set": {"subjects": subjects}}
+            self.user_collection.update_one(user_query,user_newvalues)
+            
+            return True 
+        
+        except:
+            print("USERNAME:" + str(name) + "DOES NOT EXIST!")
+            return False 
+
+
+
+
 
 
