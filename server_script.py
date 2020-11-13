@@ -9,8 +9,8 @@ port_backup = int(sys.argv[4])
 
 
 server = Server()
-server.server_initialize(status, port, host_backup, port_backup)
 server.initialize_log_file()
+server.server_initialize(status, port, host_backup, port_backup)
 server.create_socket()
 server.bind_socket()
 server.run()
