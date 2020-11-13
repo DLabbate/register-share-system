@@ -167,11 +167,41 @@ class Client:
             print('Error' + str(msg))
             sys.exit()
 
+    def send_retrieve_texts(self, name):
+
+        # Create message object to send to server through pickle
+        msg = {"TYPE": "RETRIEVE-TEXTS", "RQ#": self.current_request_num, "NAME": name}
+        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        msg_serialized = pickle.dumps(msg)
+        # print(msg)
+
+        try:
+            self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
+
+    def send_end_connection(self):
+        cient_address = self.client_socket.getsockname()
+        client_ip = socket.gethostbyname(socket.gethostname())
+        client_port = cient_address[1]
+        # Create message object to send to server through pickle
+        msg = {"TYPE": "END-CONNECTION", "RQ#": self.current_request_num, "IP": client_ip, "PORT": client_port}
+        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        msg_serialized = pickle.dumps(msg)
+        # print(msg)
+
+        try:
+            self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
 
     def menu(self):
 
         while(True):
-            print ("[Enter 1 to register]\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n[Enter 5 to publish messages]\n[Enter anything else to exit]")
+            print ("[Enter 1 to register]\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n"
+                   "[Enter 5 to publish text]\n[Enter 6 to retrieve texts]\n[Enter e to exist]")
             command = input()
             self.current_requests.append(self.current_request_num)
             if (command == '1'):
@@ -190,13 +220,19 @@ class Client:
                 self.send_update_subjects(name,subjects)
                 #subjects = subjects.split(",")
             elif (command == '5'):
-                name = input("Enter name to publish a message: ")
-                subject = input ("Enter subject of the message: ")
-                text = input ("Enter message: ")
+                name = input("Enter name to publish a text: ")
+                subject = input ("Enter subject of the text: ")
+                text = input ("Enter text: ")
                 self.send_publish(name,subject,text)
+            elif (command == '6'):
+                name = input ("Enter name to retrieve texts on your subjects: ")
+                self.send_retrieve_texts(name)
 
-            else:
+            elif (command == 'e'):
+                self.send_end_connection()
                 sys.exit()
+            else:
+                pass
             self.current_request_num += 1
 
     def listen(self):
