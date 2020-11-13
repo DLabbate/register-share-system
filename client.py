@@ -27,7 +27,7 @@ class Client:
         date_str = date_str_temp.replace(" ","-") #This replaces spaces in the file path with a '-'
         date_str = date_str.replace(".","-") #This replaces spaces in the file path with a '-'
         date_str = date_str.replace(":","-") #This replaces spaces in the file path with a '-'
-        self.log_file_path = "logs/" + "client-" + date_str + ".txt"
+        self.log_file_path = "logs/client/" + "client-" + date_str + ".txt"
 
     def update_servers(self,host_a,port_a,host_b,port_b):
         self.host_a = host_a

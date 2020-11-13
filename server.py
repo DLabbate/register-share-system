@@ -4,6 +4,8 @@ import time
 import pickle
 import ast
 import json
+import datetime
+
 from db_handler import DBHandler
 import utils
 
@@ -13,6 +15,21 @@ class Server:
         self.sock = None #socket
         self.host = None
         self.port = 8888
+        self.log_file_path = ''
+
+    def initialize_log_file(self):
+        date_str_temp = str(datetime.datetime.now())
+        date_str = date_str_temp.replace(" ","-") #This replaces spaces in the file path with a '-'
+        date_str = date_str.replace(".","-") #This replaces spaces in the file path with a '-'
+        date_str = date_str.replace(":","-") #This replaces spaces in the file path with a '-'
+        self.log_file_path = "logs/server/" + "server-" + date_str + ".txt"
+
+    def write_to_log(self,msg):
+        #self.semaphore.acquire()
+        log_file = open(self.log_file_path,"a+")
+        log_file.write(str(msg)+"\n")
+        log_file.close()
+        #self.semaphore.release()
 
     def create_socket(self):
         try:
@@ -24,6 +41,8 @@ class Server:
             
             # create the socket
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.write_to_log(socket.gethostbyname(socket.gethostname()))
+            self.write_to_log('Server socket created')
             print('Socket created')
 
         except OSError as msg:
@@ -41,8 +60,8 @@ class Server:
     # Process message and call appropriate function
     def handle_client(self,message_dict,address):
         message_type = message_dict["TYPE"]
-
-        print('Message[' + str(address) + ']: ' + str(message_dict))
+        self.write_to_log('MESSAGE RECEIVED [' + str(address) + ']: ' + str(message_dict))
+        #print('Message[' + str(address) + ']: ' + str(message_dict))
         if (message_type == "INITIALIZATION"):
             pass
 
@@ -53,9 +72,12 @@ class Server:
             if (success):
                 msg = {"TYPE":"REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
                 self.sock.sendto(utils.serialize(msg), address)
+                self.write_to_log("MESSAGE SENT "+str(msg))
             else:
                 msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"]}
                 self.sock.sendto(utils.serialize(msg), address)
+                self.write_to_log("MESSAGE SENT "+str(msg))
+
 
         elif (message_type == "DE-REGISTER"):
             pass
@@ -87,7 +109,8 @@ class Server:
                 client_dict = ast.literal_eval(str(client_data))
                 #print(clientDict["TYPE"])
             except:
-                print("ERROR CONVERTING MESSAGE TO DICTIONARY")
+                self.write_to_log("ERROR CONVERTING MESSAGE TO DICTIONARY")
+                #print("ERROR CONVERTING MESSAGE TO DICTIONARY")
 
             self.handle_client(client_dict,addr)
 
