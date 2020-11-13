@@ -38,4 +38,17 @@ class DBHandler:
             print("USERNAME:" + str(name) + "DOES NOT EXIST!")
             return False
 
+    def update_socket(self,name,ip,port):
+
+        try:
+            user_query = {"_id":name}
+            user_newvalues = { "$set": {"IP": ip,"port": port}}
+            self.user_collection.update_one(user_query, user_newvalues)
+            return True 
+        
+        except:
+            print("USERNAME:" + str(name) + "DOES NOT EXIST!")
+            return False 
+
+
 

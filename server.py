@@ -70,7 +70,16 @@ class Server:
 
 
         elif (message_type == "UPDATE-SOCKET"):
-            pass
+            db = DBHandler()
+            success = db.update_socket(message_dict["NAME"], message_dict["IP"], message_dict["PORT"])
+
+            if (success):
+                msg = {"TYPE":"UPDATE-SOCKET-SUCCESS","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            else:
+                msg = {"TYPE":"DE-REGISTER-DENIED","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            
         elif (message_type == "SUBJECTS"):
             pass
         elif (message_type == "PUBLISH"):
