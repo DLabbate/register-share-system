@@ -26,7 +26,7 @@ class Server:
     def change_server(self,address):
         msg = {"TYPE":"CHANGE-SERVER","IP":self.host,"PORT":self.port}
         self.sock.sendto(utils.serialize(msg),address)
-        self.write_to_log("MESSAGE SENT "+str(msg))
+        self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t '  + str(msg))
 
     def gain_control(self):
         #self.semaphore.acquire()
@@ -107,7 +107,7 @@ class Server:
     # Process message and call appropriate function
     def handle_client(self,message_dict,address):
         message_type = message_dict["TYPE"]
-        self.write_to_log('MESSAGE RECEIVED [' + str(address) + ']: ' + str(message_dict))
+        self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
         #print('Message[' + str(address) + ']: ' + str(message_dict))
 
         #self.semaphore.acquire()
@@ -119,11 +119,11 @@ class Server:
             if (success):
                 msg = {"TYPE":"REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
                 self.sock.sendto(utils.serialize(msg), address)
-                self.write_to_log("MESSAGE SENT "+str(msg))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
             else:
                 msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"]}
                 self.sock.sendto(utils.serialize(msg), address)
-                self.write_to_log("MESSAGE SENT "+str(msg))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
         elif (message_type == "DE-REGISTER"):
             pass
         elif (message_type == "UPDATE-SOCKET"):

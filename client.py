@@ -56,7 +56,7 @@ class Client:
 
         try:
             self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
-            self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+            self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
@@ -67,7 +67,7 @@ class Client:
         client_port = cient_address[1]
         # Create message object to send to server through pickle
         msg = {"TYPE":"REGISTER","RQ#":self.current_request_num,"NAME":name,"IP":client_ip,"PORT":client_port}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         #print(msg)
 
@@ -81,7 +81,7 @@ class Client:
 
         # Create message object to send to server through pickle
         msg = {"TYPE":"DE-REGISTER","RQ#":self.current_request_num,"NAME":name}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         #print(msg)
 
@@ -97,7 +97,7 @@ class Client:
         client_port = cient_address[1]
         # Create message object to send to server through pickle
         msg = {"TYPE":"UPDATE-SOCKET","RQ#":self.current_request_num,"NAME":name,"IP":client_ip,"PORT":client_port}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         #print(msg)
 
@@ -128,7 +128,7 @@ class Client:
             #self.write_to_log(type(int(msg_dict["RQ#"])))
             if "RQ#" in msg_dict:
                 if ( self.check_valid_request(int(msg_dict["RQ#"])) ):
-                    self.write_to_log("MESSAGE RECEIVED " + str(msg_dict) + "\n")
+                    self.write_to_log("MESSAGE RECEIVED\t " + str(msg_dict) + "\n")
                     self.current_requests.remove((int(msg_dict["RQ#"])))
                     #print(self.current_requests)
                     #print(str(msg_dict))
@@ -144,7 +144,7 @@ class Client:
     def send_update_subjects(self, name, subjects):
         # Create message object to send to server through pickle
         msg = {"TYPE": "SUBJECTS", "RQ#": self.current_request_num, "NAME": name, "SUBJECT-LIST": subjects}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         # print(msg)
 
@@ -157,7 +157,7 @@ class Client:
     def send_publish (self, name, subject, text):
         # Create message object to send to server through pickle
         msg = {"TYPE": "PUBLISH", "RQ#": self.current_request_num, "NAME": name, "SUBJECT": subject, "TEXT":text}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         # print(msg)
 
@@ -171,7 +171,7 @@ class Client:
 
         # Create message object to send to server through pickle
         msg = {"TYPE": "RETRIEVE-TEXTS", "RQ#": self.current_request_num, "NAME": name}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         # print(msg)
 
@@ -187,7 +187,7 @@ class Client:
         client_port = cient_address[1]
         # Create message object to send to server through pickle
         msg = {"TYPE": "END-CONNECTION", "RQ#": self.current_request_num, "IP": client_ip, "PORT": client_port}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         # print(msg)
 
