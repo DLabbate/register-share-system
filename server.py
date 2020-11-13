@@ -58,7 +58,17 @@ class Server:
                 self.sock.sendto(utils.serialize(msg), address)
 
         elif (message_type == "DE-REGISTER"):
-            pass
+            db = DBHandler()
+            success = db.remove_user(message_dict["NAME"])
+
+            if (success):
+                msg = {"TYPE":"DE-REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            else:
+                msg = {"TYPE":"DE-REGISTER-DENIED","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+
+
         elif (message_type == "UPDATE-SOCKET"):
             pass
         elif (message_type == "SUBJECTS"):
