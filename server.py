@@ -97,7 +97,17 @@ class Server:
 
 
         elif (message_type == "PUBLISH"):
-            pass
+            db = DBHandler()
+
+            success = db.publish_message(message_dict["NAME"], message_dict["SUBJECT"], message_dict["TEXT"])
+
+            if (success):
+                msg = {"TYPE":"PUBLISH-SUCCESS","RQ#":message_dict["RQ#"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            else:
+                msg = {"TYPE":"PUBLISH-DENIED","RQ#":message_dict["RQ#"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            
         else:
             pass
 

@@ -64,6 +64,42 @@ class DBHandler:
         except:
             print("USERNAME:" + str(name) + "DOES NOT EXIST!")
             return False 
+    
+    def publish_message (self, name, subject, text):
+
+        try:
+
+            #user_query = {"_id":name}
+
+            if (self.user_collection.count_documents({"_id":name}) != 0):
+
+                print("name exists")
+                
+                if(self.user_collection.find({"_id":name, "subjects": subject}).count() != 0):
+
+                    print("subject exits")
+                
+                    message = {"name":name,"subject":subject,"text":text}
+                    self.messages_collection.insert_one(message)
+                    return True
+
+                else:
+                    print("SUBJECT:" + str(subject) + " NOT FOUND IN SUBJECT LIST")
+                    return False
+
+            else:
+
+                print("USERNAME:" + str(name) + " DOES NOT EXIST!")
+                return False
+
+        except:
+
+            print("MESSAGE NOT PUBLISHED FROM USERNAME:" + str(name))
+            return False
+
+
+
+        
 
 
 
