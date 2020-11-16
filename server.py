@@ -22,6 +22,7 @@ class Server:
         self.host_backup = None
         self.port_backup = 0
         self.semaphore = threading.Semaphore(1)
+        self.client_list = [] #This is a list of addresses of all the connected clients
 
     def change_server(self,address):
         msg = {"TYPE":"CHANGE-SERVER","IP":self.host,"PORT":self.port}
@@ -114,18 +115,21 @@ class Server:
 
         #self.semaphore.acquire()
         if (message_type == "INITIALIZATION"):
-            pass
+            self.client_list.append(address)
+            self.write_to_log(self.client_list)
         elif (message_type == "REGISTER"):
             db = DBHandler()
             success = db.add_user(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
             if (success):
                 msg = {"TYPE":"REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
-                self.sock.sendto(utils.serialize(msg), address)
-                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                if self.active == True:
+                    self.sock.sendto(utils.serialize(msg), address)
+                    self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
             else:
                 msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"]}
-                self.sock.sendto(utils.serialize(msg), address)
-                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                if self.active == True:
+                    self.sock.sendto(utils.serialize(msg), address)
+                    self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
         elif (message_type == "DE-REGISTER"):
             pass
         elif (message_type == "UPDATE-SOCKET"):
@@ -136,9 +140,15 @@ class Server:
             pass
         elif (message_type == "CHANGE-SERVER"):
             # If the server receives this message, it gains control
-            #self.write_to_log("hello")
             self.gain_control()
             self.start_timer_thread()
+        elif (message_type == "END-CONNECTION"):
+            # This message is received when a client terminates its execution
+            try:
+                self.client_list.remove(address)
+                self.write_to_log(self.client_list)
+            except:
+                pass
         else:
             pass
     #self.semaphore.release()

@@ -15,6 +15,7 @@ class Client:
         self.port_a = 0
         self.host_b = ''
         self.port_b = 0
+        self.active_a = True #This will be True when server a is active, and False when server b is active
         self.current_server = ''
         self.current_request_num = 1
         self.log_file_path = '' # make a new log file for the client
@@ -73,6 +74,7 @@ class Client:
 
         try:
             self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            #self.client_socket.sendto(msg_serialized, (self.host_b, self.port_b))
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
