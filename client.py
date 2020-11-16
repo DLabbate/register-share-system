@@ -117,7 +117,7 @@ class Client:
 
     def handle_response(self,msg):
         msg = (msg)[0]
-
+        
         # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
         try:
             msg = utils.deserialize(msg)
@@ -137,9 +137,13 @@ class Client:
                 else:
                     self.write_to_log("RECEIVED AN INVALID RQ#!")
             else:
-                pass
                 #In this branch, the message does not have a key for RQ#
                 #This might be a message coming from the server to inform the client that the server location has changed
+
+                #If we get a CHANGE-SERVER message, we know the active server has switched
+                if "CHANGE-SERVER" == msg_dict.get("TYPE"):
+                    self.active_a = not self.active_a
+                    self.write_to_log("MESSAGE RECEIVED\t " + str(msg_dict) + "\n")
         except:
             self.write_to_log("ERROR READING MESSAGE!")
 

@@ -26,8 +26,19 @@ class Server:
 
     def change_server(self,address):
         msg = {"TYPE":"CHANGE-SERVER","IP":self.host,"PORT":self.port}
-        self.sock.sendto(utils.serialize(msg),address)
+        msg_serialized = utils.serialize(msg)
+        self.sock.sendto(msg_serialized,address)
+
+        # Send this message to the other server
         self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t '  + str(msg))
+
+        # Also send this message to all the connected clients
+        try:
+            for i in self.client_list:
+                self.sock.sendto(msg_serialized,i)
+                self.write_to_log('MESSAGE SENT\t\t [' + str(i) + ']:\t '  + str(msg))
+        except:
+            print("ERROR SENDING CHANGE-SERVER MESSAGE TO ALL CLIENTS")
 
     def gain_control(self):
         self.semaphore.acquire()
@@ -116,7 +127,6 @@ class Server:
         #self.semaphore.acquire()
         if (message_type == "INITIALIZATION"):
             self.client_list.append(address)
-            self.write_to_log(self.client_list)
         elif (message_type == "REGISTER"):
             db = DBHandler()
             success = db.add_user(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
@@ -146,7 +156,6 @@ class Server:
             # This message is received when a client terminates its execution
             try:
                 self.client_list.remove(address)
-                self.write_to_log(self.client_list)
             except:
                 pass
         else:
