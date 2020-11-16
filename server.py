@@ -29,29 +29,31 @@ class Server:
         self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t '  + str(msg))
 
     def gain_control(self):
-        #self.semaphore.acquire()
+        self.semaphore.acquire()
         self.active = True
-        #self.semaphore.release()
+        self.semaphore.release()
 
     def start_timer(self):
         #self.semaphore.acquire()
-        if self.active == True:
-            #self.semaphore.release()
-            endtime = time.time() + 20
-            while time.time() < endtime:
-                #self.write_to_log("time: " + str(time.time()) + "active: " + str(self.active))
-                pass
-            #self.semaphore.acquire()
-            self.active = False
-            # We should now send a message to the other server to inform it to take
-            self.change_server((self.host_backup,self.port_backup))
-            #self.semaphore.release()
+        #if self.active == True:
+        #    self.semaphore.release()
+
+        # Busy wait
+        endtime = time.time() + 20
+        while time.time() < endtime:
+            #self.write_to_log("time: " + str(time.time()) + "active: " + str(self.active))
+            pass
+
+        self.semaphore.acquire()
+        self.active = False
+        self.semaphore.release()
+        # We should now send a message to the other server to inform it to take
+        self.change_server((self.host_backup,self.port_backup))
+        
     
     def start_timer_thread(self):
-        # self.semaphore.acquire()
         timer_thread = threading.Thread(target=self.start_timer)
         timer_thread.start()
-        #self.semaphore.release()
 
     def server_initialize(self, status,port, host_backup, port_backup):
         if (status == 'active'):
