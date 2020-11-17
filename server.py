@@ -132,14 +132,25 @@ class Server:
             success = db.add_user(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
             if (success):
                 msg = {"TYPE":"REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
-                if self.active == True:
-                    self.sock.sendto(utils.serialize(msg), address)
-                    self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+
+                self.semaphore.acquire()
+                try:
+                    if self.active == True:
+                        self.sock.sendto(utils.serialize(msg), address)
+                        self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                finally:
+                    self.semaphore.release()
             else:
                 msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"]}
-                if self.active == True:
-                    self.sock.sendto(utils.serialize(msg), address)
-                    self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+
+                self.semaphore.acquire()
+                try:
+                    if self.active == True:
+                        self.sock.sendto(utils.serialize(msg), address)
+                        self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                finally:
+                    self.semaphore.release()
+                    
         elif (message_type == "DE-REGISTER"):
             pass
         elif (message_type == "UPDATE-SOCKET"):
