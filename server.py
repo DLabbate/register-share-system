@@ -129,7 +129,6 @@ class Server:
         self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
         #print('Message[' + str(address) + ']: ' + str(message_dict))
 
-        #self.semaphore.acquire()
         if (message_type == "INITIALIZATION"):
             self.client_list.append(address)
         elif (message_type == "REGISTER"):
@@ -161,11 +160,15 @@ class Server:
             success = self.db.remove_user(message_dict["NAME"])
 
             if (success):
-                msg = {"TYPE":"DE-REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
-                self.sock.sendto(utils.serialize(msg), address)
+                msg_client = {"TYPE":"DE-REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
+                msg_server = {"TYPE":"DE-REGISTER-SUCCESS","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"]}
+                self.sock.sendto(utils.serialize(msg_client), address)
+                self.sock.sendto(utils.serialize(msg_server), (self.host_backup,self.port_backup))
             else:
-                msg = {"TYPE":"DE-REGISTER-DENIED","RQ#":message_dict["RQ#"]}
-                self.sock.sendto(utils.serialize(msg), address)
+                msg_client = {"TYPE":"DE-REGISTER-DENIED","RQ#":message_dict["RQ#"]}
+                msg_server = {"TYPE":"DE-REGISTER-DENIED","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"]}
+                self.sock.sendto(utils.serialize(msg_client), address)
+                self.sock.sendto(utils.serialize(msg_server), (self.host_backup,self.port_backup))
 
 
         elif (message_type == "UPDATE-SOCKET"):
@@ -175,9 +178,11 @@ class Server:
             if (success):
                 msg = {"TYPE":"UPDATE-SOCKET-SUCCESS","RQ#":message_dict["RQ#"]}
                 self.sock.sendto(utils.serialize(msg), address)
+                self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
             else:
                 msg = {"TYPE":"UPDATE-SOCKET-DENIED","RQ#":message_dict["RQ#"]}
                 self.sock.sendto(utils.serialize(msg), address)
+                self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
             
         elif (message_type == "SUBJECTS"):
             
@@ -190,9 +195,11 @@ class Server:
             if (success):
                 msg = {"TYPE":"UPDATE-SUBJECTS-SUCCESS","RQ#":message_dict["RQ#"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
                 self.sock.sendto(utils.serialize(msg), address)
+                self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
             else:
                 msg = {"TYPE":"UPDATE-SUBJECTS-DENIED","RQ#":message_dict["RQ#"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
                 self.sock.sendto(utils.serialize(msg), address)
+                self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
 
 
         elif (message_type == "PUBLISH"):
@@ -202,9 +209,11 @@ class Server:
             if (success):
                 msg = {"TYPE":"PUBLISH-SUCCESS","RQ#":message_dict["RQ#"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
                 self.sock.sendto(utils.serialize(msg), address)
+                self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
             else:
                 msg = {"TYPE":"PUBLISH-DENIED","RQ#":message_dict["RQ#"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
                 self.sock.sendto(utils.serialize(msg), address)
+                self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
 
         elif (message_type == "RETRIEVE-TEXTS"):
 
@@ -230,9 +239,45 @@ class Server:
                 self.client_list.remove(address)
             except:
                 pass
+
+        elif ((message_type == "REGISTER-SUCCESS") or (message_type == "REGISTER-DENIED")):
+            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
+            pass
+
+        elif ((message_type == "DE-REGISTER-SUCCESS") or (message_type == "DE-REGISTER-DENIED")):
+            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
+            try: 
+                if (message_type == "DE-REGISTER-SUCCESS"):
+                    success = self.db.remove_user(message_dict["NAME"])
+            except Exception as msg:
+                print(str(msg))
+
+        elif ((message_type == "UPDATE-SOCKET-SUCCESS") or (message_type == "UPDATE-SOCKET-DENIED")):
+            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
+            try: 
+                if (message_type == "UPDATE-SOCKET-SUCCESS"):
+                    self.db.update_socket(message_dict["NAME"], message_dict["IP"], message_dict["PORT"])
+            except:
+                pass
+
+        elif ((message_type == "UPDATE-SUBJECTS-SUCCESS") or (message_type == "UPDATE-SUBJECTS-DENIED")):
+            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
+            try: 
+                if (message_type == "UPDATE-SUBJECTS-SUCCESS"):
+                    self.db.update_subjects(message_dict["NAME"], subjects_list)
+            except:
+                pass
+        
+        elif ((message_type == "PUBLISH-SUCCESS") or (message_type == "PUBLISH-DENIED")):
+            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
+            try: 
+                if (message_type == "PUBLISH-SUCCESS"):
+                    self.db.publish_message(message_dict["NAME"], message_dict["SUBJECT"], message_dict["TEXT"])
+            except:
+                pass
+
         else:
             pass
-    #self.semaphore.release()
         
     def run(self):
         while (True):
