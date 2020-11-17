@@ -74,7 +74,7 @@ class Client:
 
         try:
             self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
-            #self.client_socket.sendto(msg_serialized, (self.host_b, self.port_b))
+            self.client_socket.sendto(msg_serialized, (self.host_b, self.port_b))
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
