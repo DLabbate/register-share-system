@@ -107,6 +107,20 @@ class Server:
             else:
                 msg = {"TYPE":"PUBLISH-DENIED","RQ#":message_dict["RQ#"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
                 self.sock.sendto(utils.serialize(msg), address)
+
+        elif (message_type == "RETRIEVE-TEXTS"):
+            db = DBHandler()
+
+            msg_list = db.retrieve_texts(message_dict["NAME"])
+
+            if (msg_list != None):
+                
+                self.sock.sendto(utils.serialize(msg_list), address)
+
+            else: 
+                
+                msg = {"TYPE":"RETRIEVE-DENIED","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
             
         else:
             pass

@@ -97,6 +97,40 @@ class DBHandler:
             print("MESSAGE NOT PUBLISHED FROM USERNAME:" + str(name))
             return False
 
+    def retrieve_texts (self, name):
+
+        try:
+            
+            user_cursor = self.user_collection.find_one({"_id":{"$eq":name}})
+
+            user_subjects = user_cursor["subjects"]
+
+            #for subject in user_subjects:
+            #    message = self.messages_collection.find_one({"subject":{"$eq":subject}})
+            #   print(message["text"])
+            
+            #print(user_subjects[0])
+            
+            message_cursor = self.messages_collection.find({"subject":{"$in":user_subjects}})
+            #print(message_cursor["text"])
+            
+            msg_list = []
+            
+            for document in message_cursor:
+                
+                msg = {"NAME":document["name"],"SUBJECT":document["subject"],"TEXT":document["text"]}
+                msg_list.append(msg)  
+            
+            return msg_list
+        
+        except:
+
+            print("TEXTS COULD NOT BE RETRIEVED FOR USERNAME:" + str(name))
+            return
+
+
+
+
 
 
         
