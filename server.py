@@ -152,13 +152,70 @@ class Server:
                     self.semaphore.release()
                     
         elif (message_type == "DE-REGISTER"):
-            pass
+            db = DBHandler()
+            success = db.remove_user(message_dict["NAME"])
+
+            if (success):
+                msg = {"TYPE":"DE-REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            else:
+                msg = {"TYPE":"DE-REGISTER-DENIED","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+
+
         elif (message_type == "UPDATE-SOCKET"):
-            pass
+            db = DBHandler()
+            success = db.update_socket(message_dict["NAME"], message_dict["IP"], message_dict["PORT"])
+
+            if (success):
+                msg = {"TYPE":"UPDATE-SOCKET-SUCCESS","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            else:
+                msg = {"TYPE":"UPDATE-SOCKET-DENIED","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            
         elif (message_type == "SUBJECTS"):
-            pass
+            db = DBHandler()
+            subjects_list = message_dict["SUBJECT-LIST"].split(",")
+            #print ("subject_list: " + (subjects_list))
+            print (subjects_list)
+
+            success = db.update_subjects(message_dict["NAME"], subjects_list)
+
+            if (success):
+                msg = {"TYPE":"UPDATE-SUBJECTS-SUCCESS","RQ#":message_dict["RQ#"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            else:
+                msg = {"TYPE":"UPDATE-SUBJECTS-DENIED","RQ#":message_dict["RQ#"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
+                self.sock.sendto(utils.serialize(msg), address)
+
+
         elif (message_type == "PUBLISH"):
-            pass
+            db = DBHandler()
+
+            success = db.publish_message(message_dict["NAME"], message_dict["SUBJECT"], message_dict["TEXT"])
+
+            if (success):
+                msg = {"TYPE":"PUBLISH-SUCCESS","RQ#":message_dict["RQ#"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
+                self.sock.sendto(utils.serialize(msg), address)
+            else:
+                msg = {"TYPE":"PUBLISH-DENIED","RQ#":message_dict["RQ#"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
+                self.sock.sendto(utils.serialize(msg), address)
+
+        elif (message_type == "RETRIEVE-TEXTS"):
+            db = DBHandler()
+
+            msg_list = db.retrieve_texts(message_dict["NAME"])
+
+            if (msg_list != None):
+                
+                self.sock.sendto(utils.serialize(msg_list), address)
+
+            else: 
+                
+                msg = {"TYPE":"RETRIEVE-DENIED","RQ#":message_dict["RQ#"]}
+                self.sock.sendto(utils.serialize(msg), address)
+
         elif (message_type == "CHANGE-SERVER"):
             # If the server receives this message, it gains control
             self.gain_control()
