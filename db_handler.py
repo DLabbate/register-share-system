@@ -1,14 +1,12 @@
 import pymongo
 from pymongo import MongoClient
 import dns
-from private.connection import connection_string
 
 class DBHandler:
 
-    def __init__(self):
-        self.connection_string = connection_string
+    def __init__(self,connection_string,db_name):
         self.client = MongoClient(connection_string)
-        self.db = self.client["register-share-system"]
+        self.db = self.client[db_name]
         self.user_collection = self.db["users"]
         self.messages_collection = self.db["messages"]
     

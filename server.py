@@ -7,8 +7,8 @@ import json
 import datetime
 import time
 import threading
-
 from db_handler import DBHandler
+from private.connection import connection_string_1,connection_string_2
 import utils
 
 class Server:
@@ -23,6 +23,7 @@ class Server:
         self.port_backup = 0
         self.semaphore = threading.Semaphore(1)
         self.client_list = [] #This is a list of addresses of all the connected clients
+        self.db = None
 
     def change_server(self,address):
         msg = {"TYPE":"CHANGE-SERVER","IP":self.host,"PORT":self.port}
@@ -70,7 +71,11 @@ class Server:
     def server_initialize(self, status,port, host_backup, port_backup):
         if (status == 'active'):
             self.active = True
+            self.db = DBHandler(connection_string_1,"register-share-system-1")
             self.start_timer_thread()
+        else:
+            self.db = DBHandler(connection_string_2,"register-share-system-2")
+
         self.port = port
         self.host_backup = host_backup
         self.port_backup = port_backup
@@ -128,8 +133,8 @@ class Server:
         if (message_type == "INITIALIZATION"):
             self.client_list.append(address)
         elif (message_type == "REGISTER"):
-            db = DBHandler()
-            success = db.add_user(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
+
+            success = self.db.add_user(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
             if (success):
                 msg = {"TYPE":"REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
 
@@ -152,8 +157,8 @@ class Server:
                     self.semaphore.release()
                     
         elif (message_type == "DE-REGISTER"):
-            db = DBHandler()
-            success = db.remove_user(message_dict["NAME"])
+            
+            success = self.db.remove_user(message_dict["NAME"])
 
             if (success):
                 msg = {"TYPE":"DE-REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
@@ -164,8 +169,8 @@ class Server:
 
 
         elif (message_type == "UPDATE-SOCKET"):
-            db = DBHandler()
-            success = db.update_socket(message_dict["NAME"], message_dict["IP"], message_dict["PORT"])
+            
+            success = self.db.update_socket(message_dict["NAME"], message_dict["IP"], message_dict["PORT"])
 
             if (success):
                 msg = {"TYPE":"UPDATE-SOCKET-SUCCESS","RQ#":message_dict["RQ#"]}
@@ -175,12 +180,12 @@ class Server:
                 self.sock.sendto(utils.serialize(msg), address)
             
         elif (message_type == "SUBJECTS"):
-            db = DBHandler()
+            
             subjects_list = message_dict["SUBJECT-LIST"].split(",")
             #print ("subject_list: " + (subjects_list))
             print (subjects_list)
 
-            success = db.update_subjects(message_dict["NAME"], subjects_list)
+            success = self.db.update_subjects(message_dict["NAME"], subjects_list)
 
             if (success):
                 msg = {"TYPE":"UPDATE-SUBJECTS-SUCCESS","RQ#":message_dict["RQ#"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
@@ -191,9 +196,8 @@ class Server:
 
 
         elif (message_type == "PUBLISH"):
-            db = DBHandler()
-
-            success = db.publish_message(message_dict["NAME"], message_dict["SUBJECT"], message_dict["TEXT"])
+ 
+            success = self.db.publish_message(message_dict["NAME"], message_dict["SUBJECT"], message_dict["TEXT"])
 
             if (success):
                 msg = {"TYPE":"PUBLISH-SUCCESS","RQ#":message_dict["RQ#"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
@@ -203,9 +207,8 @@ class Server:
                 self.sock.sendto(utils.serialize(msg), address)
 
         elif (message_type == "RETRIEVE-TEXTS"):
-            db = DBHandler()
 
-            msg_list = db.retrieve_texts(message_dict["NAME"])
+            msg_list = self.db.retrieve_texts(message_dict["NAME"])
 
             if (msg_list != None):
                 
@@ -220,6 +223,7 @@ class Server:
             # If the server receives this message, it gains control
             self.gain_control()
             self.start_timer_thread()
+
         elif (message_type == "END-CONNECTION"):
             # This message is received when a client terminates its execution
             try:
