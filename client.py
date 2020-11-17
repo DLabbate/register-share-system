@@ -15,10 +15,12 @@ class Client:
         self.port_a = 0
         self.host_b = ''
         self.port_b = 0
+        self.active_a = True #This will be True when server a is active, and False when server b is active
         self.current_server = ''
         self.current_request_num = 1
         self.log_file_path = '' # make a new log file for the client
         self.semaphore = threading.Semaphore(1)
+        self.semaphore_server = threading.Semaphore(1)
         #self.log_file = 0
         self.current_requests = [] # requests that have been sent but have not yet been handled e.g. [0,1]
         
@@ -27,7 +29,7 @@ class Client:
         date_str = date_str_temp.replace(" ","-") #This replaces spaces in the file path with a '-'
         date_str = date_str.replace(".","-") #This replaces spaces in the file path with a '-'
         date_str = date_str.replace(":","-") #This replaces spaces in the file path with a '-'
-        self.log_file_path = "logs/" + "client-" + date_str + ".txt"
+        self.log_file_path = "logs/client/" + "client-" + date_str + ".txt"
 
     def update_servers(self,host_a,port_a,host_b,port_b):
         self.host_a = host_a
@@ -56,10 +58,26 @@ class Client:
 
         try:
             self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
-            self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+            self.client_socket.sendto(msg_serialized, (self.host_b, self.port_b))
+            self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
+
+    def send_to_current_server(self,msg_serialized):
+        self.semaphore_server.acquire()
+        try:
+            if (self.active_a == True):
+                self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            else:
+                self.client_socket.sendto(msg_serialized, (self.host_b, self.port_b))
+
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
+        
+        finally:
+            self.semaphore_server.release()
 
     def send_register(self,name):
         cient_address = self.client_socket.getsockname()
@@ -67,12 +85,13 @@ class Client:
         client_port = cient_address[1]
         # Create message object to send to server through pickle
         msg = {"TYPE":"REGISTER","RQ#":self.current_request_num,"NAME":name,"IP":client_ip,"PORT":client_port}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         #print(msg)
 
         try:
             self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            self.client_socket.sendto(msg_serialized, (self.host_b, self.port_b))
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
@@ -81,12 +100,13 @@ class Client:
 
         # Create message object to send to server through pickle
         msg = {"TYPE":"DE-REGISTER","RQ#":self.current_request_num,"NAME":name}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         #print(msg)
 
         try:
-            self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            #self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            self.send_to_current_server(msg_serialized)
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
@@ -97,12 +117,72 @@ class Client:
         client_port = cient_address[1]
         # Create message object to send to server through pickle
         msg = {"TYPE":"UPDATE-SOCKET","RQ#":self.current_request_num,"NAME":name,"IP":client_ip,"PORT":client_port}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         msg_serialized = pickle.dumps(msg)
         #print(msg)
 
         try:
+            #self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            self.send_to_current_server(msg_serialized)
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
+
+    def send_update_subjects(self, name, subjects):
+        # Create message object to send to server through pickle
+        msg = {"TYPE": "SUBJECTS", "RQ#": self.current_request_num, "NAME": name, "SUBJECT-LIST": subjects}
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
+        msg_serialized = pickle.dumps(msg)
+        # print(msg)
+
+        try:
+            #self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            self.send_to_current_server(msg_serialized)
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
+
+    def send_publish (self, name, subject, text):
+        # Create message object to send to server through pickle
+        msg = {"TYPE": "PUBLISH", "RQ#": self.current_request_num, "NAME": name, "SUBJECT": subject, "TEXT":text}
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
+        msg_serialized = pickle.dumps(msg)
+        # print(msg)
+
+        try:
+            #self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            self.send_to_current_server(msg_serialized)
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
+
+    def send_retrieve_texts(self, name):
+        # Create message object to send to server through pickle
+        msg = {"TYPE": "RETRIEVE-TEXTS", "RQ#": self.current_request_num, "NAME": name}
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
+        msg_serialized = utils.serialize(msg)
+        # print(msg)
+
+        try:
+            #self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            self.send_to_current_server(msg_serialized)
+        except OSError as msg:
+            print('Error' + str(msg))
+            sys.exit()
+
+    def send_end_connection(self):
+        cient_address = self.client_socket.getsockname()
+        client_ip = socket.gethostbyname(socket.gethostname())
+        client_port = cient_address[1]
+        # Create message object to send to server through pickle
+        msg = {"TYPE": "END-CONNECTION", "RQ#": self.current_request_num, "IP": client_ip, "PORT": client_port}
+        self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
+        msg_serialized = pickle.dumps(msg)
+        # print(msg)
+
+        try:
             self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
+            self.client_socket.sendto(msg_serialized, (self.host_b, self.port_b))
         except OSError as msg:
             print('Error' + str(msg))
             sys.exit()
@@ -115,7 +195,7 @@ class Client:
 
     def handle_response(self,msg):
         msg = (msg)[0]
-
+        
         # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
         try:
             msg = utils.deserialize(msg)
@@ -128,50 +208,44 @@ class Client:
             #self.write_to_log(type(int(msg_dict["RQ#"])))
             if "RQ#" in msg_dict:
                 if ( self.check_valid_request(int(msg_dict["RQ#"])) ):
-                    self.write_to_log("MESSAGE RECEIVED " + str(msg_dict) + "\n")
+                
+                    self.write_to_log("MESSAGE RECEIVED\t " + str(msg_dict) + "\n")
                     self.current_requests.remove((int(msg_dict["RQ#"])))
+                    
+                    if "RETRIEVE-SUCCESS" == msg_dict.get("TYPE"):
+
+                        posts_list = utils.convert_to_dict(msg_dict["POSTS"])
+                        #print(posts_list)
+                        #print(type(posts_list))
+
+
+                        for posts in posts_list:
+                            self.write_to_log(str(posts) + "\n")
+
                     #print(self.current_requests)
                     #print(str(msg_dict))
                 else:
                     self.write_to_log("RECEIVED AN INVALID RQ#!")
             else:
-                pass
                 #In this branch, the message does not have a key for RQ#
                 #This might be a message coming from the server to inform the client that the server location has changed
+
+                #If we get a CHANGE-SERVER message, we know the active server has switched
+                if "CHANGE-SERVER" == msg_dict.get("TYPE"):
+                    self.semaphore_server.acquire()
+                    try:
+                        self.active_a = not self.active_a
+                        self.write_to_log("MESSAGE RECEIVED\t " + str(msg_dict) + "\n")
+                    finally:
+                        self.semaphore_server.release()
         except:
             self.write_to_log("ERROR READING MESSAGE!")
-
-    def send_update_subjects(self, name, subjects):
-        # Create message object to send to server through pickle
-        msg = {"TYPE": "SUBJECTS", "RQ#": self.current_request_num, "NAME": name, "SUBJECT-LIST": subjects}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
-        msg_serialized = pickle.dumps(msg)
-        # print(msg)
-
-        try:
-            self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
-        except OSError as msg:
-            print('Error' + str(msg))
-            sys.exit()
-
-    def send_publish (self, name, subject, text):
-        # Create message object to send to server through pickle
-        msg = {"TYPE": "PUBLISH", "RQ#": self.current_request_num, "NAME": name, "SUBJECT": subject, "TEXT":text}
-        self.write_to_log("MESSAGE SENT " + str(msg) + "\n")
-        msg_serialized = pickle.dumps(msg)
-        # print(msg)
-
-        try:
-            self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
-        except OSError as msg:
-            print('Error' + str(msg))
-            sys.exit()
-
 
     def menu(self):
 
         while(True):
-            print ("[Enter 1 to register]\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n[Enter 5 to publish messages]\n[Enter anything else to exit]")
+            print ("[Enter 1 to register]\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n"
+                   "[Enter 5 to publish text]\n[Enter 6 to retrieve texts]\n[Enter e to exist]")
             command = input()
             self.current_requests.append(self.current_request_num)
             if (command == '1'):
@@ -190,13 +264,20 @@ class Client:
                 self.send_update_subjects(name,subjects)
                 #subjects = subjects.split(",")
             elif (command == '5'):
-                name = input("Enter name to publish a message: ")
-                subject = input ("Enter subject of the message: ")
-                text = input ("Enter message: ")
+                name = input("Enter name to publish a text: ")
+                subject = input ("Enter subject of the text: ")
+                text = input ("Enter text: ")
                 self.send_publish(name,subject,text)
+            elif (command == '6'):
+                name = input ("Enter name to retrieve texts on your subjects: ")
+                self.send_retrieve_texts(name)
 
-            else:
+            elif (command == 'e'):
+                self.send_end_connection()
                 sys.exit()
+            else:
+                pass
+            #self.write_to_log("active_a : " + str(self.active_a))
             self.current_request_num += 1
 
     def listen(self):
