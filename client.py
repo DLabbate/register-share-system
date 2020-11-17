@@ -208,8 +208,20 @@ class Client:
             #self.write_to_log(type(int(msg_dict["RQ#"])))
             if "RQ#" in msg_dict:
                 if ( self.check_valid_request(int(msg_dict["RQ#"])) ):
+                
                     self.write_to_log("MESSAGE RECEIVED\t " + str(msg_dict) + "\n")
                     self.current_requests.remove((int(msg_dict["RQ#"])))
+                    
+                    if "RETRIEVE-SUCCESS" == msg_dict.get("TYPE"):
+
+                        posts_list = utils.convert_to_dict(msg_dict["POSTS"])
+                        #print(posts_list)
+                        #print(type(posts_list))
+
+
+                        for posts in posts_list:
+                            self.write_to_log(str(posts) + "\n")
+
                     #print(self.current_requests)
                     #print(str(msg_dict))
                 else:

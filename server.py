@@ -176,11 +176,11 @@ class Server:
             success = self.db.update_socket(message_dict["NAME"], message_dict["IP"], message_dict["PORT"])
 
             if (success):
-                msg = {"TYPE":"UPDATE-SOCKET-SUCCESS","RQ#":message_dict["RQ#"]}
+                msg = {"TYPE":"UPDATE-SOCKET-SUCCESS","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"IP":message_dict["IP"],"PORT":message_dict["PORT"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
             else:
-                msg = {"TYPE":"UPDATE-SOCKET-DENIED","RQ#":message_dict["RQ#"]}
+                msg = {"TYPE":"UPDATE-SOCKET-DENIED","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"IP":message_dict["IP"],"PORT":message_dict["PORT"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
             
@@ -193,11 +193,11 @@ class Server:
             success = self.db.update_subjects(message_dict["NAME"], subjects_list)
 
             if (success):
-                msg = {"TYPE":"UPDATE-SUBJECTS-SUCCESS","RQ#":message_dict["RQ#"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
+                msg = {"TYPE":"UPDATE-SUBJECTS-SUCCESS","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
             else:
-                msg = {"TYPE":"UPDATE-SUBJECTS-DENIED","RQ#":message_dict["RQ#"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
+                msg = {"TYPE":"UPDATE-SUBJECTS-DENIED","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
 
@@ -207,11 +207,11 @@ class Server:
             success = self.db.publish_message(message_dict["NAME"], message_dict["SUBJECT"], message_dict["TEXT"])
 
             if (success):
-                msg = {"TYPE":"PUBLISH-SUCCESS","RQ#":message_dict["RQ#"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
+                msg = {"TYPE":"PUBLISH-SUCCESS","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
             else:
-                msg = {"TYPE":"PUBLISH-DENIED","RQ#":message_dict["RQ#"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
+                msg = {"TYPE":"PUBLISH-DENIED","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
 
@@ -221,7 +221,8 @@ class Server:
 
             if (msg_list != None):
                 
-                self.sock.sendto(utils.serialize(msg_list), address)
+                msg = {"TYPE":"RETRIEVE-SUCCESS","RQ#":message_dict["RQ#"],"POSTS":msg_list}
+                self.sock.sendto(utils.serialize(msg), address)
 
             else: 
                 
@@ -262,6 +263,8 @@ class Server:
 
         elif ((message_type == "UPDATE-SUBJECTS-SUCCESS") or (message_type == "UPDATE-SUBJECTS-DENIED")):
             #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
+            subjects_list = message_dict["SUBJECT-LIST"].split(",")
+            
             try: 
                 if (message_type == "UPDATE-SUBJECTS-SUCCESS"):
                     self.db.update_subjects(message_dict["NAME"], subjects_list)
