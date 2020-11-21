@@ -14,7 +14,7 @@ import utils
 class Server:
 
     def __init__(self):
-        self.sock = None #socket
+        self.sock = None # socket
         self.host = None
         self.port = 8888
         self.log_file_path = ''
@@ -22,8 +22,9 @@ class Server:
         self.host_backup = None
         self.port_backup = 0
         self.semaphore = threading.Semaphore(1)
-        self.client_list = [] #This is a list of addresses of all the connected clients
+        self.client_list = [] # This is a list of addresses of all the connected clients
         self.db = None
+        self.server_tag = "B" # This is simply a tag for the server ("A" or "B")
 
     def change_server(self,address):
         msg = {"TYPE":"CHANGE-SERVER","IP":self.host,"PORT":self.port}
@@ -68,19 +69,39 @@ class Server:
         timer_thread = threading.Thread(target=self.start_timer)
         timer_thread.start()
 
+    # This function is called the first time we initialize server A or server B (1 active & 1 inactive)
     def server_initialize(self, status,port, host_backup, port_backup):
         if (status == 'active'):
+            self.server_tag = "A"
             self.active = True
             self.db = DBHandler(connection_string_1,"register-share-system-1")
             self.start_timer_thread()
         else:
+            self.server_tag = "B"
             self.db = DBHandler(connection_string_2,"register-share-system-2")
-
+            
         self.port = port
         self.host_backup = host_backup
         self.port_backup = port_backup
         # self.write_to_log("Status: " + str(status))
         # self.write_to_log("Other server: (" + str(host_backup) + "," + str(port_backup) + ")")
+
+    # This function is called when there are two servers already in the system, but we want to
+    # change the IP/Port of the inactive server
+    def new_server_initialize(self,port):
+        self.port = port
+        self.db = DBHandler(connection_string_2,"register-share-system-2")
+
+    # This function sends an "UPDATE-SERVER" message to both servers that are already in the system
+    # We refer to these as server A and server B
+    def update_server(self,host_a,port_a,host_b,port_b):
+        msg = {"TYPE":"UPDATE-SERVER","IP":self.host,"PORT":self.port}
+        msg_serialized = utils.serialize(msg)
+        try:
+            self.sock.sendto(msg_serialized,(host_a,port_a))
+            self.sock.sendto(msg_serialized,(host_b,port_b))
+        except:
+            print("FAILED TO SEND UPDATE-SERVER MESSAGE")
 
     def write_to_log(self,msg):
         #self.semaphore.acquire()
@@ -234,6 +255,44 @@ class Server:
             self.gain_control()
             self.start_timer_thread()
 
+        elif (message_type == "UPDATE-SERVER"):
+            self.semaphore.acquire()
+            try:
+                if self.active == True:
+
+                    # If a server receives this message, it means it the inactive server has 
+                    # changed its IP and PORT. Thus, we should update these values
+                    self.host_backup = message_dict["IP"]
+                    self.port_backup = message_dict["PORT"]
+
+                    # We should now reply to the new server that we have taken note of its IP and PORT
+                    # We also send it our IP and PORT number so it knows which one is the active server
+                    msg_reply = {"TYPE":"UPDATE-SERVER-SUCCESS","IP":self.host,"PORT":self.port}
+                    msg_reply_serialized = utils.serialize(msg_reply)
+                    self.sock.sendto(msg_reply_serialized,address)
+                    self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t '  + str(msg_reply))
+
+                # else if the inactive server receives this message, it should send a message 
+                # to all the connected clients so they know where the new inactive server is
+                else:
+                    new_host = message_dict["IP"]
+                    new_port = message_dict["PORT"]
+                    msg_client = {"TYPE":"UPDATE-SERVER","IP":new_host,"PORT":new_port,"SERVER-TAG":self.server_tag}
+                    msg_client_serialized = utils.serialize(msg_client)
+
+                    for i in self.client_list:
+                        self.sock.sendto(msg_client_serialized,i)
+                        self.write_to_log('MESSAGE SENT\t\t [' + str(i) + ']:\t '  + str(msg_client))
+        
+            except:
+                print("ERROR SENDING UPDATE-SERVER MESSAGE")
+                msg_error = {"TYPE":"UPDATE-SERVER-DENIED"}
+                msg_error_serialized = utils.serialize(msg_error)
+                self.sock.sendto(msg_error_serialized,address)
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t '  + str(msg_error))
+            finally:
+                self.semaphore.release()
+
         elif (message_type == "END-CONNECTION"):
             # This message is received when a client terminates its execution
             try:
@@ -276,6 +335,14 @@ class Server:
             try: 
                 if (message_type == "PUBLISH-SUCCESS"):
                     self.db.publish_message(message_dict["NAME"], message_dict["SUBJECT"], message_dict["TEXT"])
+            except:
+                pass
+
+        elif ((message_type == "UPDATE-SERVER-SUCCESS") or (message_type == "UPDATE-SERVER-DENIED")):
+            try: 
+                if (message_type == "UPDATE-SERVER-SUCCESS"):
+                    self.host_backup = message_dict["IP"]
+                    self.port_backup = message_dict["PORT"]
             except:
                 pass
 
