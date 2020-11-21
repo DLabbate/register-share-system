@@ -8,8 +8,10 @@ import datetime
 import time
 import threading
 from db_handler import DBHandler
-from private.connection import connection_string_1,connection_string_2
+from private.connection import connection_string_1, connection_string_2
 import utils
+import os
+import signal
 
 class Server:
 
@@ -314,7 +316,7 @@ class Server:
                 print("ERROR SENDING UPDATE-SERVER MESSAGE")
                 msg_error = {"TYPE":"UPDATE-SERVER-DENIED"}
                 msg_error_serialized = utils.serialize(msg_error)
-                self.sock.sendto(msg_error_serialized,address)
+                self.sock.sendto(msg_error_serialized, address)
                 self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t '  + str(msg_error))
             finally:
                 self.semaphore.release()
