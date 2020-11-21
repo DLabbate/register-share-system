@@ -311,6 +311,8 @@ class Server:
                         self.sock.sendto(msg_client_serialized,i)
                         self.write_to_log('MESSAGE SENT\t\t [' + str(i) + ']:\t '  + str(msg_client))
                     self.write_to_log("SERVER-CLOSED")
+                    print ("SERVER-CLOSED")
+
 
             except:
                 print("ERROR SENDING UPDATE-SERVER MESSAGE")
