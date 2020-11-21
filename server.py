@@ -161,7 +161,9 @@ class Server:
                 try:
                     if self.active == True:
                         self.sock.sendto(utils.serialize(msg), address)
+                        self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
                         self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                        self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup,self.port_backup)) + ']:\t ' + str(msg))
                 finally:
                     self.semaphore.release()
             else:
@@ -171,7 +173,9 @@ class Server:
                 try:
                     if self.active == True:
                         self.sock.sendto(utils.serialize(msg), address)
+                        self.sock.sendto(utils.serialize(msg), (self.host_backup, self.port_backup))
                         self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                        self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg))
                 finally:
                     self.semaphore.release()
                     
@@ -184,11 +188,15 @@ class Server:
                 msg_server = {"TYPE":"DE-REGISTER-SUCCESS","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"]}
                 self.sock.sendto(utils.serialize(msg_client), address)
                 self.sock.sendto(utils.serialize(msg_server), (self.host_backup,self.port_backup))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg_client))
+                self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg_server))
             else:
                 msg_client = {"TYPE":"DE-REGISTER-DENIED","RQ#":message_dict["RQ#"]}
                 msg_server = {"TYPE":"DE-REGISTER-DENIED","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"]}
                 self.sock.sendto(utils.serialize(msg_client), address)
                 self.sock.sendto(utils.serialize(msg_server), (self.host_backup,self.port_backup))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg_client))
+                self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg_server))
 
 
         elif (message_type == "UPDATE-SOCKET"):
@@ -199,10 +207,14 @@ class Server:
                 msg = {"TYPE":"UPDATE-SOCKET-SUCCESS","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"IP":message_dict["IP"],"PORT":message_dict["PORT"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg))
             else:
                 msg = {"TYPE":"UPDATE-SOCKET-DENIED","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"IP":message_dict["IP"],"PORT":message_dict["PORT"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg))
             
         elif (message_type == "SUBJECTS"):
             
@@ -216,10 +228,14 @@ class Server:
                 msg = {"TYPE":"UPDATE-SUBJECTS-SUCCESS","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg))
             else:
                 msg = {"TYPE":"UPDATE-SUBJECTS-DENIED","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"SUBJECT-LIST":message_dict["SUBJECT-LIST"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg))
 
 
         elif (message_type == "PUBLISH"):
@@ -230,10 +246,14 @@ class Server:
                 msg = {"TYPE":"PUBLISH-SUCCESS","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg))
             else:
                 msg = {"TYPE":"PUBLISH-DENIED","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"SUBJECT":message_dict["SUBJECT"], "TEXT":message_dict["TEXT"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup,self.port_backup))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg))
 
         elif (message_type == "RETRIEVE-TEXTS"):
 
@@ -243,11 +263,17 @@ class Server:
                 
                 msg = {"TYPE":"RETRIEVE-SUCCESS","RQ#":message_dict["RQ#"],"POSTS":msg_list}
                 self.sock.sendto(utils.serialize(msg), address)
+                self.sock.sendto(utils.serialize(msg), (self.host_backup, self.port_backup))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg))
 
             else: 
                 
                 msg = {"TYPE":"RETRIEVE-DENIED","RQ#":message_dict["RQ#"]}
                 self.sock.sendto(utils.serialize(msg), address)
+                self.sock.sendto(utils.serialize(msg), (self.host_backup, self.port_backup))
+                self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+                self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg))
 
         elif (message_type == "CHANGE-SERVER"):
             # If the server receives this message, it gains control
@@ -282,7 +308,8 @@ class Server:
                     for i in self.client_list:
                         self.sock.sendto(msg_client_serialized,i)
                         self.write_to_log('MESSAGE SENT\t\t [' + str(i) + ']:\t '  + str(msg_client))
-        
+                    self.write_to_log("SERVER-CLOSED")
+
             except:
                 print("ERROR SENDING UPDATE-SERVER MESSAGE")
                 msg_error = {"TYPE":"UPDATE-SERVER-DENIED"}
