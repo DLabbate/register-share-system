@@ -53,7 +53,7 @@ class Server:
         #    self.semaphore.release()
 
         # Busy wait
-        endtime = time.time() + 20
+        endtime = time.time() + 30
         while time.time() < endtime:
             #self.write_to_log("time: " + str(time.time()) + "active: " + str(self.active))
             pass
@@ -90,7 +90,6 @@ class Server:
     # change the IP/Port of the inactive server
     def new_server_initialize(self,port):
         self.port = port
-        self.db = DBHandler(connection_string_2,"register-share-system-2")
 
     # This function sends an "UPDATE-SERVER" message to both servers that are already in the system
     # We refer to these as server A and server B
@@ -267,7 +266,7 @@ class Server:
 
                     # We should now reply to the new server that we have taken note of its IP and PORT
                     # We also send it our IP and PORT number so it knows which one is the active server
-                    msg_reply = {"TYPE":"UPDATE-SERVER-SUCCESS","IP":self.host,"PORT":self.port}
+                    msg_reply = {"TYPE":"UPDATE-SERVER-SUCCESS","IP":self.host,"PORT":self.port,"SERVER-TAG":self.server_tag,"CLIENT-LIST":self.client_list}
                     msg_reply_serialized = utils.serialize(msg_reply)
                     self.sock.sendto(msg_reply_serialized,address)
                     self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t '  + str(msg_reply))
@@ -341,8 +340,18 @@ class Server:
         elif ((message_type == "UPDATE-SERVER-SUCCESS") or (message_type == "UPDATE-SERVER-DENIED")):
             try: 
                 if (message_type == "UPDATE-SERVER-SUCCESS"):
+                    if message_dict["SERVER-TAG"] == "A":
+                        self.server_tag = "B"
+                        self.db = DBHandler(connection_string_2,"register-share-system-2")
+                    else:
+                        self.server_tag = 'A'
+                        self.db = DBHandler(connection_string_1, "register-share-system-1")
+
+
                     self.host_backup = message_dict["IP"]
                     self.port_backup = message_dict["PORT"]
+                    self.client_list = utils.convert_to_dict(message_dict["CLIENT-LIST"])
+
             except:
                 pass
 
