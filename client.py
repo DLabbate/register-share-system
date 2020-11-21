@@ -238,6 +238,21 @@ class Client:
                         self.write_to_log("MESSAGE RECEIVED\t " + str(msg_dict) + "\n")
                     finally:
                         self.semaphore_server.release()
+                
+                # If we receive this message, we should update the new IP and PORT
+                # of server A or server B (depending on which one sent the message)
+                elif "UPDATE-SERVER" == msg_dict.get("TYPE"):
+                    self.semaphore_server.acquire()
+                    try:
+                        if ("A" == msg_dict.get("SERVER-TAG")):
+                            self.host_a = msg_dict.get("IP")
+                            self.port_a = msg_dict.get("PORT")
+                        elif ("B" == msg_dict.get("SERVER-TAG")):
+                            self.host_b = msg_dict.get("IP")
+                            self.port_b = msg_dict.get("PORT")
+                        self.write_to_log("MESSAGE RECEIVED\t " + str(msg_dict) + "\n")
+                    finally:
+                        self.semaphore_server.release()
         except:
             self.write_to_log("ERROR READING MESSAGE!")
 
