@@ -156,7 +156,7 @@ class Server:
         elif (message_type == "REGISTER"):
 
             success = self.db.add_user(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
-            if (success):
+            if (success == 0):
                 msg = {"TYPE":"REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
 
                 self.semaphore.acquire()
@@ -169,7 +169,18 @@ class Server:
                 finally:
                     self.semaphore.release()
             else:
-                msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"]}
+                
+                if (success == 1):
+                
+                    msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"],"REASON":"USERNAME ALREADY EXISTS"}
+
+                elif (success == 2):
+
+                    msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"],"REASON":"NOT A VALID USERNAME"}
+
+                elif(success == 3):
+
+                    msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"],"REASON":"DATABASE CONNECTION ERROR"}
 
                 self.semaphore.acquire()
                 try:

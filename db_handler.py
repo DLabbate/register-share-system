@@ -21,22 +21,22 @@ class DBHandler:
             
                     user = {"_id":name,"IP":ip,"port":port }
                     self.user_collection.insert_one(user)
-                    return True 
+                    return 0
             
                 else:
 
                     print("USERNAME:" + str(name) + " ALREADY EXISTS!")
-                    return False
+                    return 1
 
             else:
                 
                 print("NOT A VALID USERNAME!")
-                return False
+                return 2
 
         except:
 
-            print("USERNAME:" + str(name) + " ALREADY EXISTS!")
-            return False
+            print("USERNAME NOT ADDED! DATABASE CONNECTION ERROR")
+            return 3
 
     #Assuming unique name IDs for each user
     def remove_user(self,name):
