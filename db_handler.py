@@ -15,15 +15,22 @@ class DBHandler:
 
         try:
             
-            if (self.user_collection.count_documents({"_id":name}) != 0):
+            if (name):
             
-                user = {"_id":name,"IP":ip,"port":port }
-                self.user_collection.insert_one(user)
-                return True 
+                if (self.user_collection.count_documents({"_id":name}) == 0):
             
-            else:
+                    user = {"_id":name,"IP":ip,"port":port }
+                    self.user_collection.insert_one(user)
+                    return True 
+            
+                else:
 
-                print("USERNAME:" + str(name) + " DOES NOT EXIST!")
+                    print("USERNAME:" + str(name) + " ALREADY EXISTS!")
+                    return False
+
+            else:
+                
+                print("NOT A VALID USERNAME!")
                 return False
 
         except:
