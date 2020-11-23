@@ -379,6 +379,15 @@ class Server:
             except:
                 pass
 
+        elif ((message_type == "RETRIEVE-SUCCESS") or (message_type == "RETRIEVE-DENIED")):
+            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
+            
+            try: 
+                if (message_type == "RETRIEVE-SUCCESS"):
+                    self.db.retrieve_texts(message_dict["NAME"])
+            except:
+                pass
+
         elif ((message_type == "UPDATE-SERVER-SUCCESS") or (message_type == "UPDATE-SERVER-DENIED")):
             try: 
                 if (message_type == "UPDATE-SERVER-SUCCESS"):
