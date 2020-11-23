@@ -148,6 +148,10 @@ class DBHandler:
 
                 message_query = {"$and":[{"subject":{"$in":user_subjects}},{"clients_received":{"$nin":[name]}}]}
                 #message_cursor = self.messages_collection.find({"$and":[{"subject":{"$in":user_subjects}},{"clients_received":{"$nin":[name]}}]})
+                message_newClients = {"$push": {"clients_received":name}}
+                
+                self.messages_collection.update_many(message_query,message_newClients)
+                
                 message_cursor = self.messages_collection.find(message_query)
                 
                 #print(message_cursor["text"])
