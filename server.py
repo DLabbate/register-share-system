@@ -156,7 +156,7 @@ class Server:
         elif (message_type == "REGISTER"):
 
             success = self.db.add_user(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])
-            if (success):
+            if (success == 0):
                 msg = {"TYPE":"REGISTER-SUCCESS","RQ#":message_dict["RQ#"]}
 
                 self.semaphore.acquire()
@@ -169,7 +169,18 @@ class Server:
                 finally:
                     self.semaphore.release()
             else:
-                msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"]}
+                
+                if (success == 1):
+                
+                    msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"],"REASON":"USERNAME ALREADY EXISTS"}
+
+                elif (success == 2):
+
+                    msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"],"REASON":"NOT A VALID USERNAME"}
+
+                elif(success == 3):
+
+                    msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"],"REASON":"DATABASE CONNECTION ERROR"}
 
                 self.semaphore.acquire()
                 try:
@@ -263,7 +274,7 @@ class Server:
 
             if (msg_list != None):
                 
-                msg = {"TYPE":"RETRIEVE-SUCCESS","RQ#":message_dict["RQ#"],"POSTS":msg_list}
+                msg = {"TYPE":"RETRIEVE-SUCCESS","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"POSTS":msg_list}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup, self.port_backup))
                 self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
@@ -365,6 +376,15 @@ class Server:
             try: 
                 if (message_type == "PUBLISH-SUCCESS"):
                     self.db.publish_message(message_dict["NAME"], message_dict["SUBJECT"], message_dict["TEXT"])
+            except:
+                pass
+
+        elif ((message_type == "RETRIEVE-SUCCESS") or (message_type == "RETRIEVE-DENIED")):
+            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
+            
+            try: 
+                if (message_type == "RETRIEVE-SUCCESS"):
+                    self.db.retrieve_texts(message_dict["NAME"])
             except:
                 pass
 
