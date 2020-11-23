@@ -142,16 +142,13 @@ class DBHandler:
                 user_cursor = self.user_collection.find_one({"_id":{"$eq":name}})
 
                 user_subjects = user_cursor["subjects"]
-            
-                #message_cursor = self.messages_collection.find({"subject":{"$in":user_subjects}})
-                #message_cursor = self.messages_collection.find({"clients_received":{"$nin":["john","tom"]}})
+        
 
                 message_query = {"$and":[{"subject":{"$in":user_subjects}},{"clients_received":{"$nin":[name]}}]}
                 message_cursor = self.messages_collection.find(message_query)
-                #message_cursor = self.messages_collection.find({"$and":[{"subject":{"$in":user_subjects}},{"clients_received":{"$nin":[name]}}]})
+                
                 message_newClients = {"$push": {"clients_received":name}}
                 
-                #print(message_cursor["text"])
                 msg_list = []
 
                 

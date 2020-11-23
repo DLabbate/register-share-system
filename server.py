@@ -274,7 +274,7 @@ class Server:
 
             if (msg_list != None):
                 
-                msg = {"TYPE":"RETRIEVE-SUCCESS","RQ#":message_dict["RQ#"],"POSTS":msg_list}
+                msg = {"TYPE":"RETRIEVE-SUCCESS","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"POSTS":msg_list}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup, self.port_backup))
                 self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
