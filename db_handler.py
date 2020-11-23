@@ -115,7 +115,7 @@ class DBHandler:
 
                     print("subject exits")
                 
-                    message = {"name":name,"subject":subject,"text":text}
+                    message = {"name":name,"subject":subject,"text":text,"clients_received":[]}
                     self.messages_collection.insert_one(message)
                     return True
 
@@ -142,20 +142,19 @@ class DBHandler:
                 user_cursor = self.user_collection.find_one({"_id":{"$eq":name}})
 
                 user_subjects = user_cursor["subjects"]
+            
+                #message_cursor = self.messages_collection.find({"subject":{"$in":user_subjects}})
+                #message_cursor = self.messages_collection.find({"clients_received":{"$nin":["john","tom"]}})
 
-                #for subject in user_subjects:
-                #    message = self.messages_collection.find_one({"subject":{"$eq":subject}})
-                #   print(message["text"])
-            
-                #print(user_subjects[0])
-            
-                message_cursor = self.messages_collection.find({"subject":{"$in":user_subjects}})
-                #print(message_cursor["text"])
-            
-                msg_list = []
-            
-                for document in message_cursor:
+                message_query = {"$and":[{"subject":{"$in":user_subjects}},{"clients_received":{"$nin":[name]}}]}
+                #message_cursor = self.messages_collection.find({"$and":[{"subject":{"$in":user_subjects}},{"clients_received":{"$nin":[name]}}]})
+                message_cursor = self.messages_collection.find(message_query)
                 
+                #print(message_cursor["text"])
+                msg_list = []
+
+                for document in message_cursor:
+
                     msg = {"NAME":document["name"],"SUBJECT":document["subject"],"TEXT":document["text"]}
                     msg_list.append(msg)  
             
