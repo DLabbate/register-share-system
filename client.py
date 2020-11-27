@@ -40,7 +40,7 @@ class Client:
         try:
             self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         except OSError as msg:
-            print('Failed to create socket')
+            print('Failed to create socket' + str(msg))
             sys.exit()
 
     def write_to_log(self,msg):

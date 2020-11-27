@@ -11,8 +11,7 @@ class DBHandler:
         self.messages_collection = self.db["messages"]
     
     def add_user(self,name,ip,port):
-        #user = {"name":name,"IP":IP,"port":port }
-
+        
         try:
             
             if (name):
@@ -38,7 +37,7 @@ class DBHandler:
             print("USERNAME NOT ADDED! DATABASE CONNECTION ERROR")
             return 3
 
-    #Assuming unique name IDs for each user
+    # Assuming unique name IDs for each user
     def remove_user(self,name):
 
         try:
@@ -79,7 +78,7 @@ class DBHandler:
             print("USERNAME:" + str(name) + "DOES NOT EXIST!")
             return False 
 
-    #Takes input array of subjects
+    # Takes input array of subjects
     def update_subjects(self,name,subjects):
 
         try: 
@@ -104,8 +103,6 @@ class DBHandler:
     def publish_message (self, name, subject, text):
 
         try:
-
-            #user_query = {"_id":name}
 
             if (self.user_collection.count_documents({"_id":name}) != 0):
 
