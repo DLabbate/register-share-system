@@ -20,12 +20,12 @@ class Server:
         self.host = None
         self.port = 8888
         self.log_file_path = ''
-        self.active = False
-        self.host_backup = None
-        self.port_backup = 0
-        self.semaphore = threading.Semaphore(1)
+        self.active = False # Indicates if the server is active or not
+        self.host_backup = None # Reference to the IP of the other server
+        self.port_backup = 0 # Reference to the Port of the other server
+        self.semaphore = threading.Semaphore(1) # Semaphore to protect the critical section ("active" variable)
         self.client_list = [] # This is a list of addresses of all the connected clients
-        self.db = None
+        self.db = None # Reference to MongoDB database
         self.server_tag = "B" # This is simply a tag for the server ("A" or "B")
 
     def change_server(self,address):
@@ -50,19 +50,17 @@ class Server:
         self.semaphore.release()
 
     def start_timer(self):
-        #self.semaphore.acquire()
-        #if self.active == True:
-        #    self.semaphore.release()
+        # Set the timer to a duration of 60 seconds (1 minute)
+        endtime = time.time() + 60
 
         # Busy wait
-        endtime = time.time() + 30
         while time.time() < endtime:
-            #self.write_to_log("time: " + str(time.time()) + "active: " + str(self.active))
             pass
 
         self.semaphore.acquire()
         self.active = False
         self.semaphore.release()
+
         # We should now send a message to the other server to inform it to take
         self.change_server((self.host_backup,self.port_backup))
         
@@ -85,8 +83,6 @@ class Server:
         self.port = port
         self.host_backup = host_backup
         self.port_backup = port_backup
-        # self.write_to_log("Status: " + str(status))
-        # self.write_to_log("Other server: (" + str(host_backup) + "," + str(port_backup) + ")")
 
     # This function is called when there are two servers already in the system, but we want to
     # change the IP/Port of the inactive server
@@ -105,17 +101,15 @@ class Server:
             print("FAILED TO SEND UPDATE-SERVER MESSAGE")
 
     def write_to_log(self,msg):
-        #self.semaphore.acquire()
         log_file = open(self.log_file_path,"a+")
         log_file.write(str(msg)+"\n")
         log_file.close()
-        #self.semaphore.release()
 
     def initialize_log_file(self):
         date_str_temp = str(datetime.datetime.now())
-        date_str = date_str_temp.replace(" ", "-")  #This replaces spaces in the file path with a '-'
-        date_str = date_str.replace(".", "-") #This replaces spaces in the file path with a '-'
-        date_str = date_str.replace(":", "-") #This replaces spaces in the file path with a '-'
+        date_str = date_str_temp.replace(" ", "-")  # This replaces spaces in the file path with a '-'
+        date_str = date_str.replace(".", "-") # This replaces spaces in the file path with a '-'
+        date_str = date_str.replace(":", "-") # This replaces spaces in the file path with a '-'
         self.log_file_path = "logs/server/" + "server-" + date_str + ".txt"
         self.write_to_log("----- Server Log -----")
 
@@ -145,11 +139,10 @@ class Server:
             print('Bind failed. Error Code : ' + str(msg))
             sys.exit()
 
-    # Process message and call appropriate function
-    def handle_client(self,message_dict,address):
+    # Process messages (from either client or other server) and take appropriate action
+    def handle_message(self,message_dict,address):
         message_type = message_dict["TYPE"]
         self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
-        #print('Message[' + str(address) + ']: ' + str(message_dict))
 
         if (message_type == "INITIALIZATION"):
             self.client_list.append(address)
@@ -171,15 +164,12 @@ class Server:
             else:
                 
                 if (success == 1):
-                
                     msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"],"REASON":"USERNAME ALREADY EXISTS"}
 
                 elif (success == 2):
-
                     msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"],"REASON":"NOT A VALID USERNAME"}
 
                 elif(success == 3):
-
                     msg = {"TYPE":"REGISTER-DENIED","RQ#":message_dict["RQ#"],"REASON":"DATABASE CONNECTION ERROR"}
 
                 self.semaphore.acquire()
@@ -232,7 +222,6 @@ class Server:
         elif (message_type == "SUBJECTS"):
             
             subjects_list = message_dict["SUBJECT-LIST"].split(",")
-            #print ("subject_list: " + (subjects_list))
             print (subjects_list)
 
             success = self.db.update_subjects(message_dict["NAME"], subjects_list)
@@ -273,7 +262,6 @@ class Server:
             msg_list = self.db.retrieve_texts(message_dict["NAME"])
 
             if (msg_list != None):
-                
                 msg = {"TYPE":"RETRIEVE-SUCCESS","RQ#":message_dict["RQ#"],"NAME":message_dict["NAME"],"POSTS":msg_list}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup, self.port_backup))
@@ -281,7 +269,6 @@ class Server:
                 self.write_to_log('MESSAGE SENT\t\t [' + str((self.host_backup, self.port_backup)) + ']:\t ' + str(msg))
 
             else: 
-                
                 msg = {"TYPE":"RETRIEVE-DENIED","RQ#":message_dict["RQ#"]}
                 self.sock.sendto(utils.serialize(msg), address)
                 self.sock.sendto(utils.serialize(msg), (self.host_backup, self.port_backup))
@@ -324,7 +311,6 @@ class Server:
                     self.write_to_log("SERVER-CLOSED")
                     print ("SERVER-CLOSED")
 
-
             except:
                 print("ERROR SENDING UPDATE-SERVER MESSAGE")
                 msg_error = {"TYPE":"UPDATE-SERVER-DENIED"}
@@ -335,18 +321,15 @@ class Server:
                 self.semaphore.release()
 
         elif (message_type == "END-CONNECTION"):
-            # This message is received when a client terminates its execution
             try:
                 self.client_list.remove(address)
             except:
                 pass
 
         elif ((message_type == "REGISTER-SUCCESS") or (message_type == "REGISTER-DENIED")):
-            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
             pass
 
         elif ((message_type == "DE-REGISTER-SUCCESS") or (message_type == "DE-REGISTER-DENIED")):
-            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
             try: 
                 if (message_type == "DE-REGISTER-SUCCESS"):
                     success = self.db.remove_user(message_dict["NAME"])
@@ -354,7 +337,6 @@ class Server:
                 print(str(msg))
 
         elif ((message_type == "UPDATE-SOCKET-SUCCESS") or (message_type == "UPDATE-SOCKET-DENIED")):
-            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
             try: 
                 if (message_type == "UPDATE-SOCKET-SUCCESS"):
                     self.db.update_socket(message_dict["NAME"], message_dict["IP"], message_dict["PORT"])
@@ -362,9 +344,7 @@ class Server:
                 pass
 
         elif ((message_type == "UPDATE-SUBJECTS-SUCCESS") or (message_type == "UPDATE-SUBJECTS-DENIED")):
-            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
             subjects_list = message_dict["SUBJECT-LIST"].split(",")
-            
             try: 
                 if (message_type == "UPDATE-SUBJECTS-SUCCESS"):
                     self.db.update_subjects(message_dict["NAME"], subjects_list)
@@ -372,7 +352,6 @@ class Server:
                 pass
         
         elif ((message_type == "PUBLISH-SUCCESS") or (message_type == "PUBLISH-DENIED")):
-            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
             try: 
                 if (message_type == "PUBLISH-SUCCESS"):
                     self.db.publish_message(message_dict["NAME"], message_dict["SUBJECT"], message_dict["TEXT"])
@@ -380,8 +359,6 @@ class Server:
                 pass
 
         elif ((message_type == "RETRIEVE-SUCCESS") or (message_type == "RETRIEVE-DENIED")):
-            #self.write_to_log('MESSAGE RECEIVED\t [' + str(address) + ']:\t ' + str(message_dict))
-            
             try: 
                 if (message_type == "RETRIEVE-SUCCESS"):
                     self.db.retrieve_texts(message_dict["NAME"])
@@ -398,7 +375,6 @@ class Server:
                         self.server_tag = 'A'
                         self.db = DBHandler(connection_string_1, "register-share-system-1")
 
-
                     self.host_backup = message_dict["IP"]
                     self.port_backup = message_dict["PORT"]
                     self.client_list = utils.convert_to_dict(message_dict["CLIENT-LIST"])
@@ -408,7 +384,8 @@ class Server:
 
         else:
             pass
-        
+    
+    # This function is an ongoing loop that receives messages from clients and the other server
     def run(self):
         while (True):
             d = self.sock.recvfrom(1024)
@@ -417,31 +394,14 @@ class Server:
             if not data:
                 break
 
-
-            #reply = bytes('OK...' + str(data), "utf-8")
-            client_data = pickle.loads(data) #DESERIALIZED DATA
+            client_data = pickle.loads(data) # DESERIALIZED DATA
             client_dict = ''
-            
-            #handleclient(clientData,address)
 
             try:
                 client_dict = ast.literal_eval(str(client_data))
-                #print(clientDict["TYPE"])
             except:
                 self.write_to_log("ERROR CONVERTING MESSAGE TO DICTIONARY")
-                #print("ERROR CONVERTING MESSAGE TO DICTIONARY")
 
-            self.handle_client(client_dict,addr)
-
-            #clientDict = pickle.loads(data)
-            #print(clientDict["TYPE"])
-            #print(type(clientData))
-            #clientDict = ast.literal_eval(clientData)
-            #print(clientDict["TYPE"])
-            #reply = pickle.dumps(data) #SERIALIZED
-
-            #self.sock.sendto(data, addr)
-            
-            #print('Message[' + str(addr) + ']: ' + str(clientData))
+            self.handle_message(client_dict,addr)
 
     
