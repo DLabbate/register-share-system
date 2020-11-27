@@ -26,6 +26,7 @@ class Client:
         date_str = date_str.replace(".","-") #This replaces spaces in the file path with a '-'
         date_str = date_str.replace(":","-") #This replaces spaces in the file path with a '-'
         self.log_file_path = "logs/client/" + "client-" + date_str + ".txt"
+        self.write_to_log("----- Client Log -----" + "\n")
 
     def update_servers(self,host_a,port_a,host_b,port_b):
         self.host_a = host_a
@@ -55,6 +56,12 @@ class Client:
         try:
             self.client_socket.sendto(msg_serialized, (self.host_a, self.port_a))
             self.client_socket.sendto(msg_serialized, (self.host_b, self.port_b))
+
+            # Write client socket info to the log
+            self.write_to_log(str(socket.gethostbyname(socket.gethostname())) + "\n")
+            self.write_to_log(str(self.client_socket.getsockname()[1]) + "\n")
+            self.write_to_log('Client socket created ' + "\n")
+
             self.write_to_log("MESSAGE SENT\t\t " + str(msg) + "\n")
         except OSError as msg:
             print('Error' + str(msg))
