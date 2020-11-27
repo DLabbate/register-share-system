@@ -377,7 +377,7 @@ class Server:
 
                     self.host_backup = message_dict["IP"]
                     self.port_backup = message_dict["PORT"]
-                    self.client_list = utils.convert_to_dict(message_dict["CLIENT-LIST"])
+                    self.client_list = utils.convert(message_dict["CLIENT-LIST"])
 
             except:
                 pass

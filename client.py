@@ -184,7 +184,7 @@ class Client:
         # WE NEED TO MAKE SURE THAT WE RECEIVE THE APPROPRIATE RQ# (FAULT TOLERANCE)
         try:
             msg = utils.deserialize(msg)
-            msg_dict = utils.convert_to_dict(msg)
+            msg_dict = utils.convert(msg)
         except:
             self.write_to_log("FAILED TO DESERIALIZE RECEIVED MESSAGE!")
 
@@ -198,7 +198,7 @@ class Client:
                     
                     if "RETRIEVE-SUCCESS" == msg_dict.get("TYPE"):
 
-                        posts_list = utils.convert_to_dict(msg_dict["POSTS"])
+                        posts_list = utils.convert(msg_dict["POSTS"])
 
                         for posts in posts_list:
                             self.write_to_log(str(posts) + "\n")

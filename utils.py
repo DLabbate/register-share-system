@@ -7,7 +7,7 @@ def serialize(msg):
 def deserialize(msg):
     return pickle.loads(msg)
 
-def convert_to_dict(msg):
+def convert(msg):
     try:
         msg_dict = ast.literal_eval(str(msg))
         return msg_dict
