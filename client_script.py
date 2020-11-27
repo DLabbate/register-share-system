@@ -1,5 +1,4 @@
 import sys
-import socket
 from client import Client
 
 host_a = str(sys.argv[1]) # Argument for IP of Server A

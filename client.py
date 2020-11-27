@@ -1,8 +1,6 @@
 import socket
 import sys      # for exit
-import time
 import pickle
-import json
 import utils
 import threading
 import datetime

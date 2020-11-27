@@ -3,15 +3,11 @@ import sys
 import time
 import pickle
 import ast
-import json
 import datetime
-import time
 import threading
 from db_handler import DBHandler
 from private.connection import connection_string_1, connection_string_2
 import utils
-import os
-import signal
 
 class Server:
 
