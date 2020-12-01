@@ -243,7 +243,7 @@ class Client:
     def menu(self):
         while(True):
             print ("[Enter 1 to register]\n[Enter 2 to de-register]\n[Enter 3 to update socket#]\n[Enter 4 to update your subjects of interest]\n"
-                   "[Enter 5 to publish text]\n[Enter 6 to retrieve texts]\n[Enter e to exist]")
+                   "[Enter 5 to publish text]\n[Enter 6 to retrieve texts]\n[Enter e to exit]")
             command = input()
             self.current_requests.append(self.current_request_num)
             if (command == '1'):
