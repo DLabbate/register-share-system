@@ -142,6 +142,18 @@ class Server:
 
         if (message_type == "INITIALIZATION"):
             self.client_list.append(address)
+
+            self.semaphore.acquire()
+            try:
+                if self.active == True:
+                    # Notify the client about which server is the active one ("A" or "B")
+                    msg = {"TYPE":"INITIALIZATION-SUCCESS","SERVER-TAG":self.server_tag}
+                    msg_serialized = utils.serialize(msg)
+                    self.sock.sendto(msg_serialized,address)
+                    self.write_to_log('MESSAGE SENT\t\t [' + str(address) + ']:\t ' + str(msg))
+            finally:
+                self.semaphore.release()
+
         elif (message_type == "REGISTER"):
 
             success = self.db.add_user(message_dict["NAME"],message_dict["IP"],message_dict["PORT"])

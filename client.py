@@ -237,6 +237,20 @@ class Client:
                         self.write_to_log("MESSAGE RECEIVED\t " + str(msg_dict) + "\n")
                     finally:
                         self.semaphore_server.release()
+                
+                # This message indicates initialization success and also informs the client
+                # about which server is the active one ("A" or "B")
+                elif "INITIALIZATION-SUCCESS" == msg_dict.get("TYPE"):
+                    self.semaphore_server.acquire()
+                    try:
+                        if "A" == msg_dict.get("SERVER-TAG"):
+                            self.active_a = True
+                        elif "B" == msg_dict.get("SERVER-TAG"):
+                            self.active_a = False
+                        self.write_to_log("MESSAGE RECEIVED\t " + str(msg_dict) + "\n")
+                    finally:
+                        self.semaphore_server.release()
+
         except:
             self.write_to_log("ERROR READING MESSAGE!")
 
