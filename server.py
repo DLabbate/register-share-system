@@ -46,8 +46,8 @@ class Server:
         self.semaphore.release()
 
     def start_timer(self):
-        # Set the timer to a duration of 60 seconds (1 minute)
-        endtime = time.time() + 60
+        # Set the timer to a duration of 120 seconds (2 minutes)
+        endtime = time.time() + 120
 
         # Busy wait
         while time.time() < endtime:
