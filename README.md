@@ -4,6 +4,7 @@
 This project consists of a "Register and Share System" where users can share information on subjects of interest and remain up to date on these subjects. The main technologies used to implement this project include the following:
 * Python
 * Socket Programming (UDP)
+* Multithreading
 * MongoDB
 * NoSQL Database
 
