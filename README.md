@@ -31,6 +31,7 @@ The user of the RSS system several options to choose from in the terminal. Every
 A new user can register using a unique username.
 
 <img src="images/REGISTER.PNG">
+<img src="images/REGISTER-SUCCESS.PNG">
 
 ### DE-REGISTER
 A user can also de-register to no longer be in the system.
@@ -50,8 +51,11 @@ A user can update their subjects of interest at any time.
 ### PUBLISH
 A new user can publish a message on their registered subjects of interest.
 
-<img src="images/REGISTER.PNG">
+<img src="images/PUBLISH.PNG">
+<img src="images/PUBLISH-SUCCESS.PNG">
 
 ### RETRIEVE-TEXTS
 A user can query for messages on their list of subjects. This will retrieve all messages the user has not seen yet where the subject is included in the user's list of interests.
+
 <img src="images/Retrieve-Texts.PNG">
+<img src="images/RETRIEVE-SUCCESS.PNG">
