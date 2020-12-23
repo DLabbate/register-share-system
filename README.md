@@ -24,7 +24,34 @@ The user of the RSS system several options to choose from in the terminal. Every
 4. Update Subjects of Interest
 5. Publish Texts
 6. Retrieve Texts
+<img src="images/Menu.png">
 
-### Register
+
+### REGISTER
 A new user can register using a unique username.
-<img src="images/REGISTER.png" width="100">
+
+<img src="images/REGISTER.PNG">
+
+### DE-REGISTER
+A user can also de-register to no longer be in the system.
+
+<img src="images/DE-REGISTER.PNG">
+
+### UPDATE-SOCKET
+If a user moves to a new IP or Port Number and would like this information to be reflected in the database, they can request an update to the socket number.
+
+<img src="images/UPDATE-SOCKET.PNG">
+
+### SUBJECTS
+A user can update their subjects of interest at any time.
+
+<img src="images/SUBJECTS.PNG">
+
+### PUBLISH
+A new user can publish a message on their registered subjects of interest.
+
+<img src="images/REGISTER.PNG">
+
+### RETRIEVE-TEXTS
+A user can query for messages on their list of subjects. This will retrieve all messages the user has not seen yet where the subject is included in the user's list of interests.
+<img src="images/Retrieve-Texts.PNG">
