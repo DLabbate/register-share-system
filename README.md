@@ -17,7 +17,7 @@ When a server decides to not anymore serve, it informs the other server which wi
 The users can register to the current server, inform the servers of their subjects of interest, send and receive updates from the current server. A user can update his/her his address (IP address and Port number), or subjects of interest anytime. A user will receive updates about his/her subjects of interest only. A user can deregister, in this case he/she will not publish or receive updates anymore.
 
 ## Features
-The user of the RSS system several options to choose from in the terminal. Every time the user sends a request, the active server will respond with a "SUCCESS" or "DENIED" in order to inform the user whether or not the request was processed. The entire list of features the client may request is listed below:
+The user of the RSS system has several options to choose from in the terminal. Every time the user sends a request, the active server will respond with "SUCCESS" or "DENIED" in order to inform the user whether or not the request was processed. The entire list of features the client may request is listed below:
 1. Register
 2. De-Register
 3. Update Socket#
@@ -49,13 +49,13 @@ A user can update their subjects of interest at any time.
 <img src="images/SUBJECTS.PNG">
 
 ### PUBLISH
-A new user can publish a message on their registered subjects of interest.
+A user can publish a message on their registered subjects of interest.
 
 <img src="images/PUBLISH.PNG">
 <img src="images/PUBLISH-SUCCESS.PNG">
 
 ### RETRIEVE-TEXTS
-A user can query for messages on their list of subjects. This will retrieve all messages the user has not seen yet where the subject is included in the user's list of interests.
+A user can query for new messages with subjects included in their list of interests.
 
 <img src="images/Retrieve-Texts.PNG">
 <img src="images/RETRIEVE-SUCCESS.PNG">
